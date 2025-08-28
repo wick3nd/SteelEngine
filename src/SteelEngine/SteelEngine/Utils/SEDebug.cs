@@ -7,9 +7,9 @@
         Warning,
         Error
     };
-
+    
     class SEDebug
-    {
+    {   
         private static readonly string _fileName = @$"Logs\log_{DateTime.Now.ToString().Replace(":", "").Replace(".", "-").Replace(" ", "_")}.txt";
 
         public static async void Log<T>(SEDebugState state, T text)

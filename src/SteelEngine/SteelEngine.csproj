@@ -6,7 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <ApplicationIcon>hl.ico</ApplicationIcon>
     <PublishTrimmed>False</PublishTrimmed>
     <PublishAot>False</PublishAot>
     <Authors>wickend</Authors>
@@ -27,6 +26,10 @@
     <WarningLevel>9999</WarningLevel>
     <DebugType>none</DebugType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="SteelEngine\Program.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="OpenTK" Version="4.9.4" />

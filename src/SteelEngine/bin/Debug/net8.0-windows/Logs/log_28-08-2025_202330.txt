@@ -1,0 +1,2 @@
+> [28.08.2025 20:23:30] | [Log]    Created new window
+> [28.08.2025 20:23:33] | [Info]    Closing the window

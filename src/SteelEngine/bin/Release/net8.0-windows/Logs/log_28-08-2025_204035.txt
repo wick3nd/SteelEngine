@@ -1,0 +1,12 @@
+> [28.08.2025 20:40:35] | [Log]    Created new window
+> [28.08.2025 20:40:35] | [Info]    Created shader handle 3
+> [28.08.2025 20:40:35] | [Info]    Created shader handle 4
+> [28.08.2025 20:40:35] | [Info]    Created Texture2D handle 1
+> [28.08.2025 20:40:35] | [Info]    Created Texture2D handle 2
+> [28.08.2025 20:40:35] | [Info]    Created a mesh SteelMotion_Data\assets\model3.semp from offset 0
+> [28.08.2025 20:40:42] | [Info]    Disposing shader handle 3
+> [28.08.2025 20:40:42] | [Info]    Disposing shader handle 4
+> [28.08.2025 20:40:42] | [Info]    Disposing Texture2D handle 1
+> [28.08.2025 20:40:42] | [Info]    Disposing Texture2D handle 2
+> [28.08.2025 20:40:42] | [Info]    Disposing mesh SteelMotion_Data\assets\model3.semp from offset 0
+> [28.08.2025 20:40:42] | [Info]    Closing the window
