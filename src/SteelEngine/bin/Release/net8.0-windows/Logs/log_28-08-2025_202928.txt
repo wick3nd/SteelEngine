@@ -1,2 +1,0 @@
-> [28.08.2025 20:29:28] | [Log]    Created new window
-> [28.08.2025 20:29:31] | [Info]    Closing the window

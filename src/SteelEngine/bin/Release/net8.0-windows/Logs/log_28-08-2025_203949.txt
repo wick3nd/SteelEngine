@@ -1,5 +1,0 @@
-> [28.08.2025 20:39:49] | [Log]    Created new window
-> [28.08.2025 20:39:49] | [Info]    Created shader handle 3
-> [28.08.2025 20:39:49] | [Info]    Created shader handle 4
-> [28.08.2025 20:39:49] | [Error]    Created a missing Texture2D handle 1
-> [28.08.2025 20:39:49] | [Error]    Created a missing Texture2D handle 2
