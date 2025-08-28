@@ -1,8 +1,8 @@
 ﻿namespace SteelEngine
 {
-    internal static class WindowRes
+    public class WindowRes
     {
-        public static int width;
-        public static int height;
+        public int width;
+        public int height;
     }
 }

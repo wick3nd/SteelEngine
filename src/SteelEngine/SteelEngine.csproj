@@ -6,7 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <ApplicationIcon>hl.ico</ApplicationIcon>
     <PublishTrimmed>False</PublishTrimmed>
     <PublishAot>False</PublishAot>
     <Authors>wickend</Authors>
