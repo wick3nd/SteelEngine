@@ -28,10 +28,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="SteelEngine\Program.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="OpenTK" Version="4.9.4" />
     <PackageReference Include="StbImageSharp" Version="2.30.15" />
   </ItemGroup>
