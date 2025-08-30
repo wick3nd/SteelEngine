@@ -22,7 +22,7 @@ namespace SteelEngine.SteelEngine.Base
         private float _camYaw;
         private float _camPitch;
         public readonly float sensitivity = 0.2f;
-        public const float speed = 0.5f;
+        public float speed = 0.5f;
 
         public Frustum frustum = new();
 
