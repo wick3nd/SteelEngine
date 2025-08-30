@@ -1,17 +1,17 @@
-﻿using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL;
 using StbImageSharp;
 using SteelEngine.Utils;
 
 namespace SteelEngine.Base
 {
-    class Texture2D : IDisposable
+    class   Texture2D : IDisposable
     {
         private readonly int _Handle;
 
         private readonly TextureUnit _unit;
 
 
-        public Texture2D(string path = "", TextureUnit unit = TextureUnit.Texture0, bool generateMipmap = true, PixelInternalFormat pixelFormat = PixelInternalFormat.Rgb, PixelType pixelType = PixelType.UnsignedByte)
+        public Texture2D(string path = "", TextureUnit unit = TextureUnit.Texture0, bool generateMipmap = true, PixelInternalFormat pixelFormat = PixelInternalFormat.Rgba, PixelType pixelType = PixelType.UnsignedByte)
         {
             _unit = unit;
 
@@ -30,7 +30,8 @@ namespace SteelEngine.Base
 
             if (path == "" || !File.Exists(path))
             {
-                byte[] imgData = [ 0xFF, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0xFF ];        // Additional 2 bytes after the first row because of OpenGL fuckery
+                byte[] imgData = [ 0xFF, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0xFF ];
+                GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
                 GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, 2, 2, 0, PixelFormat.Rgb, PixelType.UnsignedByte, imgData);
 
                 SEDebug.Log(SEDebugState.Error, $"Created a missing Texture2D handle {_Handle}");

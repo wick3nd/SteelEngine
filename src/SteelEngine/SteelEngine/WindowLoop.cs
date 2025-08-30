@@ -1,4 +1,4 @@
-﻿using OpenTK.Mathematics;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
 using SteelEngine.Utils;
 using OpenTK.Windowing.Common;
@@ -11,9 +11,13 @@ namespace SteelEngine
         private static double fixedTime;
         public double fixedTimeStep = .02;
 
-        public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), Title = title })
+        public WindowRes windowRes = new();
+
+        public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), Title = title /*, Flags = ContextFlags.Default, WindowBorder = WindowBorder.Fixed */})
         {
             CenterWindow(new Vector2i(width, height));
+
+            if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs"); 
 
             SEDebug.Log(SEDebugState.Log, "Created new window");
         }
@@ -22,8 +26,8 @@ namespace SteelEngine
         {
             base.OnLoad();
 
-            WindowRes.width = Monitors.GetPrimaryMonitor().HorizontalResolution;
-            WindowRes.height = Monitors.GetPrimaryMonitor().VerticalResolution;
+            windowRes.width = Monitors.GetPrimaryMonitor().HorizontalResolution;
+            windowRes.height = Monitors.GetPrimaryMonitor().VerticalResolution;
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             GL.Enable(EnableCap.DepthTest);
@@ -64,12 +68,15 @@ namespace SteelEngine
         {
             base.OnFramebufferResize(e);
 
-            SEDebug.Log(SEDebugState.Info, "resized");
+            SEDebug.Log(SEDebugState.Info, $"resized -- Width: {e.Width} Height: {e.Height}");
 
-            GL.Viewport(0, 0, WindowRes.width, WindowRes.height);
+            GL.Viewport(0, 0, e.Width, e.Height);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             OnResize(e);
         }
+
+        protected override void OnUpdateFrame(FrameEventArgs e) => base.OnUpdateFrame(e);
+        protected override void OnMouseDown(MouseButtonEventArgs e) => base.OnMouseDown(e);
 
         protected virtual void Start() { }
         protected virtual void OnExit() { }

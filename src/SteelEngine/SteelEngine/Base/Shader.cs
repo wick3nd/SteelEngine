@@ -23,10 +23,9 @@ namespace SteelEngine.Base
             void main() {
                 vec4 image0 = texture(texture0, TexCoord);
                 vec4 image1 = texture(texture1, TexCoord);
-                vec4 image2 = texture(texture2, TexCoord);
 
                 float pulse = abs(sin(time));
-                FragColor = mix(mix(image0, image1, 0.5f), image2, pulse);
+                FragColor = mix(image0, image1, image1.a * pulse);
             }
             """;
 
@@ -41,10 +40,11 @@ namespace SteelEngine.Base
             uniform float tilingY = 1.0f;
             uniform mat4 projection = mat4(1.0f);
             uniform mat4 model = mat4(1.0f);
+            uniform mat4 view;
             
             void main()
             {
-                gl_Position =  projection * model * vec4(aPosition, 1.0f);
+                gl_Position =  projection * view * model * vec4(aPosition, 1.0f);
                 TexCoord = vec2(aTexCoord.x * tilingX, aTexCoord.y * tilingY);
             }
             """;
