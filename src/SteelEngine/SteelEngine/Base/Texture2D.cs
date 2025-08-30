@@ -4,14 +4,14 @@ using SteelEngine.Utils;
 
 namespace SteelEngine.Base
 {
-    class Texture2D : IDisposable
+    class   Texture2D : IDisposable
     {
         private readonly int _Handle;
 
         private readonly TextureUnit _unit;
 
 
-        public Texture2D(string path = "", TextureUnit unit = TextureUnit.Texture0, bool generateMipmap = true, PixelInternalFormat pixelFormat = PixelInternalFormat.Rgb, PixelType pixelType = PixelType.UnsignedByte)
+        public Texture2D(string path = "", TextureUnit unit = TextureUnit.Texture0, bool generateMipmap = true, PixelInternalFormat pixelFormat = PixelInternalFormat.Rgba, PixelType pixelType = PixelType.UnsignedByte)
         {
             _unit = unit;
 
