@@ -1,4 +1,4 @@
-﻿using OpenTK.Mathematics;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
 using SteelEngine.Utils;
 using OpenTK.Windowing.Common;
@@ -10,16 +10,14 @@ namespace SteelEngine
     {
         private static double fixedTime;
         public double fixedTimeStep = .02;
-        public WindowRes windowRes = new WindowRes();
+
+        public WindowRes windowRes = new();
 
         public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), Title = title /*, Flags = ContextFlags.Default, WindowBorder = WindowBorder.Fixed */})
         {
             CenterWindow(new Vector2i(width, height));
 
-            if (!Directory.Exists("Logs"))
-            {
-                Directory.CreateDirectory("Logs");
-            }
+            if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs"); 
 
             SEDebug.Log(SEDebugState.Log, "Created new window");
         }
@@ -77,15 +75,8 @@ namespace SteelEngine
             OnResize(e);
         }
 
-        protected override void OnUpdateFrame(FrameEventArgs e)
-        {
-            base.OnUpdateFrame(e);
-        }
-
-        protected override void OnMouseDown(MouseButtonEventArgs e)
-        {
-            base.OnMouseDown(e);
-        }
+        protected override void OnUpdateFrame(FrameEventArgs e) => base.OnUpdateFrame(e);
+        protected override void OnMouseDown(MouseButtonEventArgs e) => base.OnMouseDown(e);
 
         protected virtual void Start() { }
         protected virtual void OnExit() { }
