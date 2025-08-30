@@ -30,8 +30,13 @@ namespace SteelEngine
             windowRes.height = Monitors.GetPrimaryMonitor().VerticalResolution;
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.Blend);
+
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.BlendEquation(BlendEquationMode.FuncAdd);
 
             Start();
         }
@@ -86,3 +91,4 @@ namespace SteelEngine
         protected virtual void FixedUpdate(FrameEventArgs e) { }
     }
 }
+
