@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK.Mathematics;
 
 namespace SteelEngine.SteelEngine.Base
 {
-public class Frustum
+    public class Frustum
     {
-        public Plane[] Planes = new Plane[6];
+        public Plane[] planes = new Plane[6];
 
         public void Update(Matrix4 viewProjection)
         {
             // lewa
-            Planes[0] = new Plane(
+            planes[0] = new Plane(
                 viewProjection.M14 + viewProjection.M11,
                 viewProjection.M24 + viewProjection.M21,
                 viewProjection.M34 + viewProjection.M31,
@@ -22,7 +17,7 @@ public class Frustum
             );
 
             // prawa
-            Planes[1] = new Plane(
+            planes[1] = new Plane(
                 viewProjection.M14 - viewProjection.M11,
                 viewProjection.M24 - viewProjection.M21,
                 viewProjection.M34 - viewProjection.M31,
@@ -30,7 +25,7 @@ public class Frustum
             );
 
             // dolna
-            Planes[2] = new Plane(
+            planes[2] = new Plane(
                 viewProjection.M14 + viewProjection.M12,
                 viewProjection.M24 + viewProjection.M22,
                 viewProjection.M34 + viewProjection.M32,
@@ -38,7 +33,7 @@ public class Frustum
             );
 
             // gorna
-            Planes[3] = new Plane(
+            planes[3] = new Plane(
                 viewProjection.M14 - viewProjection.M12,
                 viewProjection.M24 - viewProjection.M22,
                 viewProjection.M34 - viewProjection.M32,
@@ -46,7 +41,7 @@ public class Frustum
             );
 
             // ta bliska
-            Planes[4] = new Plane(
+            planes[4] = new Plane(
                 viewProjection.M14 + viewProjection.M13,
                 viewProjection.M24 + viewProjection.M23,
                 viewProjection.M34 + viewProjection.M33,
@@ -54,28 +49,21 @@ public class Frustum
             );
 
             // ta z tylu
-            Planes[5] = new Plane(
+            planes[5] = new Plane(
                 viewProjection.M14 - viewProjection.M13,
                 viewProjection.M24 - viewProjection.M23,
                 viewProjection.M34 - viewProjection.M33,
                 viewProjection.M44 - viewProjection.M43
             );
 
-            for (int i = 0; i < 6; i++)
-                Planes[i].Normalize();
+            for (int i = 0; i < 6; i++) planes[i].Normalize();
         }
     }
 
-    public struct Plane
+    public struct Plane(float a, float b, float c, float d)
     {
-        public Vector3 Normal;
-        public float D;
-
-        public Plane(float a, float b, float c, float d)
-        {
-            Normal = new Vector3(a, b, c);
-            D = d;
-        }
+        public Vector3 Normal = new(a, b, c);
+        public float D = d;
 
         public void Normalize()
         {
@@ -84,10 +72,7 @@ public class Frustum
             D /= length;
         }
 
-        public float DistanceToPoint(Vector3 point)
-        {
-            return Vector3.Dot(Normal, point) + D;
-        }
+        public readonly float DistanceToPoint(Vector3 point) => Vector3.Dot(Normal, point) + D;
     }
 
 }
