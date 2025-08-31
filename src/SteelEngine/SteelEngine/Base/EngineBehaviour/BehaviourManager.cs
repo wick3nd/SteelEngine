@@ -31,7 +31,7 @@ namespace SteelEngine
         }
         public static void ExposeHeight(int height)
         {
-            for (int i = 0; i < behaviours.Count; i++) behaviours[i].WindowWidth = height;
+            for (int i = 0; i < behaviours.Count; i++) behaviours[i].WindowHeight = height;
         }
         public static void StartCall()
         {
