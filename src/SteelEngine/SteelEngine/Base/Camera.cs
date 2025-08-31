@@ -22,7 +22,7 @@ namespace SteelEngine.SteelEngine.Base
         private float _camYaw;
         private float _camPitch;
         public readonly float sensitivity = 0.2f;
-        public float speed = 0.5f;
+        public float speed = 2f;
 
         public Frustum frustum = new();
 
@@ -64,19 +64,22 @@ namespace SteelEngine.SteelEngine.Base
             return true;
         }
 
-        private void HandleKeyboard(KeyboardState input)
+        private void HandleKeyboard(KeyboardState input, float deltaTime)
         {
-            if (input.IsKeyDown(Keys.W)) camPosition += _camFront * speed;    // Forward
+            float acceleration = speed * deltaTime;
+            if (input.IsKeyDown(Keys.LeftControl)) acceleration *= 2f;
 
-            if (input.IsKeyDown(Keys.S)) camPosition -= _camFront * speed;    // Backward
+            if (input.IsKeyDown(Keys.W)) camPosition += _camFront * acceleration;    // Forward
 
-            if (input.IsKeyDown(Keys.A)) camPosition -= Vector3.Normalize(Vector3.Cross(_camFront, _up)) * speed;    // Left
+            if (input.IsKeyDown(Keys.S)) camPosition -= _camFront * acceleration;    // Backward
 
-            if (input.IsKeyDown(Keys.D)) camPosition += Vector3.Normalize(Vector3.Cross(_camFront, _up)) * speed;    // Right
+            if (input.IsKeyDown(Keys.A)) camPosition -= Vector3.Normalize(Vector3.Cross(_camFront, _up)) * acceleration;    // Left
 
-            if (input.IsKeyDown(Keys.Space)) camPosition += _up * speed;    // Up
+            if (input.IsKeyDown(Keys.D)) camPosition += Vector3.Normalize(Vector3.Cross(_camFront, _up)) * acceleration;    // Right
 
-            if (input.IsKeyDown(Keys.LeftShift))  camPosition -= _up * speed;    // Down
+            if (input.IsKeyDown(Keys.Space)) camPosition += _up * acceleration;    // Up
+
+            if (input.IsKeyDown(Keys.LeftShift))  camPosition -= _up * acceleration;    // Down
         }
 
         private void HandleMouse(MouseState mouse)
@@ -96,12 +99,10 @@ namespace SteelEngine.SteelEngine.Base
             _camFront.Normalize();
         }
 
-        public void ProcessKeyboardInput(KeyboardState input)
+        public void ProcessInput(KeyboardState input, MouseState mouse, float deltaTime, ref bool cursorLocked, Action setCursorNormal, Action setCursorGrabbed)
         {
-            HandleKeyboard(input);
-        }
-        public void ProcessMouseInput(KeyboardState input, MouseState mouse, ref bool cursorLocked, Action setCursorNormal, Action setCursorGrabbed)
-        {
+            HandleKeyboard(input, deltaTime);
+
             if (input.IsKeyPressed(Keys.Escape))
             {
                 cursorLocked = false;
