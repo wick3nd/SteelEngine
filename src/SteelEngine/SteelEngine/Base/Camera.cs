@@ -1,11 +1,12 @@
 using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace SteelEngine.SteelEngine.Base
 {
-    public class Camera
+    public class Camera : EngineScript
     {
-        public float fieldOfView = 90f;
+        public float fieldOfView = 60f;
 
         public Matrix4 view;
         public Matrix4 projection;
@@ -21,12 +22,13 @@ namespace SteelEngine.SteelEngine.Base
 
         private float _camYaw;
         private float _camPitch;
+        public float speed = 2f;
         public readonly float sensitivity = 0.2f;
-        public float speed = 0.5f;
+        public bool isCursorLocked = true;
 
         public Frustum frustum = new();
 
-        public Camera() 
+        public Camera()
         {
             _up = Vector3.UnitY;
             camPosition = new Vector3(0.0f, 0.0f, 3.0f);
@@ -44,11 +46,15 @@ namespace SteelEngine.SteelEngine.Base
             _camFront = new Vector3(0.0f, 0.0f, -1.0f);
         }
 
-        public void Update(WindowRes windowRes)
+        public override void Update(FrameEventArgs e)
         {
-            float aspectRatio = windowRes.height > 0 ? windowRes.width / (float)windowRes.height : 1f;
+            base.Update(e);
 
-            projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(fieldOfView), aspectRatio, 0.1f, 100f);
+            ProcessInput(KeyboardState!, MouseState!, (float)DeltaTime);
+
+            float aspectRatio = WindowHeight > 0 ? WindowWidth / (float)WindowHeight : 1f;
+
+            projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(fieldOfView), aspectRatio, 0.0001f, 10000f);
             view = Matrix4.LookAt(camPosition, camPosition + _camFront, _up);
 
             Matrix4 viewProj = view * projection;
@@ -64,19 +70,22 @@ namespace SteelEngine.SteelEngine.Base
             return true;
         }
 
-        private void HandleKeyboard(KeyboardState input)
+        private void HandleKeyboard(KeyboardState input, float deltaTime)
         {
-            if (input.IsKeyDown(Keys.W)) camPosition += _camFront * speed;    // Forward
+            float acceleration = speed * deltaTime;
+            if (input.IsKeyDown(Keys.LeftControl)) acceleration *= 2f;
 
-            if (input.IsKeyDown(Keys.S)) camPosition -= _camFront * speed;    // Backward
+            if (input.IsKeyDown(Keys.W)) camPosition += _camFront * acceleration;    // Forward
 
-            if (input.IsKeyDown(Keys.A)) camPosition -= Vector3.Normalize(Vector3.Cross(_camFront, _up)) * speed;    // Left
+            if (input.IsKeyDown(Keys.S)) camPosition -= _camFront * acceleration;    // Backward
 
-            if (input.IsKeyDown(Keys.D)) camPosition += Vector3.Normalize(Vector3.Cross(_camFront, _up)) * speed;    // Right
+            if (input.IsKeyDown(Keys.A)) camPosition -= Vector3.Normalize(Vector3.Cross(_camFront, _up)) * acceleration;    // Left
 
-            if (input.IsKeyDown(Keys.Space)) camPosition += _up * speed;    // Up
+            if (input.IsKeyDown(Keys.D)) camPosition += Vector3.Normalize(Vector3.Cross(_camFront, _up)) * acceleration;    // Right
 
-            if (input.IsKeyDown(Keys.LeftShift))  camPosition -= _up * speed;    // Down
+            if (input.IsKeyDown(Keys.Space)) camPosition += _up * acceleration;    // Up
+
+            if (input.IsKeyDown(Keys.LeftShift)) camPosition -= _up * acceleration;    // Down
         }
 
         private void HandleMouse(MouseState mouse)
@@ -96,24 +105,20 @@ namespace SteelEngine.SteelEngine.Base
             _camFront.Normalize();
         }
 
-        public void ProcessKeyboardInput(KeyboardState input)
-        {
-            HandleKeyboard(input);
-        }
-        public void ProcessMouseInput(KeyboardState input, MouseState mouse, ref bool cursorLocked, Action setCursorNormal, Action setCursorGrabbed)
+        public void ProcessInput(KeyboardState input, MouseState mouse, float deltaTime)
         {
             if (input.IsKeyPressed(Keys.Escape))
             {
-                cursorLocked = false;
-                setCursorNormal();
+                isCursorLocked = !isCursorLocked;
+                BehaviourManager.currentCursorState = CursorState.Normal;
             }
 
-            if (cursorLocked)
+            if (isCursorLocked)
             {
-                setCursorGrabbed();
+                BehaviourManager.currentCursorState = CursorState.Grabbed;
+                HandleKeyboard(input, deltaTime);
                 HandleMouse(mouse);
             }
         }
-
     }
 }

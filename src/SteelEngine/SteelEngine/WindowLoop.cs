@@ -11,13 +11,14 @@ namespace SteelEngine
         private static double fixedTime;
         public double fixedTimeStep = .02;
 
-        public WindowRes windowRes = new();
-
-        public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), Title = title /*, Flags = ContextFlags.Default, WindowBorder = WindowBorder.Fixed */})
+        public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), MinimumClientSize = (256, 144), Title = title, Vsync = VSyncMode.Off, Flags = ContextFlags.Default/*, WindowBorder = WindowBorder.Fixed*/})
         {
-            CenterWindow(new Vector2i(width, height));
+            if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
 
-            if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs"); 
+            CenterWindow(new Vector2i(width, height));
+            
+            BehaviourManager.ExposeWidth(width);
+            BehaviourManager.ExposeHeight(height);
 
             SEDebug.Log(SEDebugState.Log, "Created new window");
         }
@@ -26,11 +27,8 @@ namespace SteelEngine
         {
             base.OnLoad();
 
-            windowRes.width = Monitors.GetPrimaryMonitor().HorizontalResolution;
-            windowRes.height = Monitors.GetPrimaryMonitor().VerticalResolution;
-
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-            
+
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);
@@ -38,14 +36,15 @@ namespace SteelEngine
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.BlendEquation(BlendEquationMode.FuncAdd);
 
-            Start();
+            BehaviourManager.InitializeES();
+            BehaviourManager.StartCall();
         }
 
         protected override void OnUnload()
         {
             base.OnUnload();
 
-            OnExit();
+            BehaviourManager.ExitCall();
 
             SEDebug.Log(SEDebugState.Info, "Closing the window");
         }
@@ -55,40 +54,48 @@ namespace SteelEngine
             base.OnRenderFrame(e);
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            
+
+            BehaviourManager.ExposeWindowFocus(IsFocused);
+            BehaviourManager.ExposeKayboardState(KeyboardState);
+            BehaviourManager.ExposeMouseState(MouseState);
+            BehaviourManager.ExposeCursorState(CursorState);
+            CursorState = BehaviourManager.currentCursorState;
+            BehaviourManager.ExposeTime(e.Time);
+
             fixedTime += e.Time;
 
             if (fixedTime >= fixedTimeStep)
             {
-                FixedUpdate(e);
+                BehaviourManager.FixedUpdateCall(e);
                 fixedTime = 0;
             }
 
-            Update(e);
-            LateUpdate(e);
+            BehaviourManager.UpdateCall(e);
+            BehaviourManager.LateUpdateCall(e);
 
             Context.SwapBuffers();
         }
+
+        protected override void OnResize(ResizeEventArgs e)
+        {
+            base.OnResize(e);
+
+            BehaviourManager.ExposeWidth(e.Width);
+            BehaviourManager.ExposeHeight(e.Height);
+
+            BehaviourManager.ResizeCall(e);
+        }
+
         protected override void OnFramebufferResize(FramebufferResizeEventArgs e)
         {
             base.OnFramebufferResize(e);
 
-            SEDebug.Log(SEDebugState.Info, $"resized -- Width: {e.Width} Height: {e.Height}");
-
-            GL.Viewport(0, 0, e.Width, e.Height);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            OnResize(e);
+
+            SEDebug.Log(SEDebugState.Info, $"resized -- Width: {e.Width} Height: {e.Height}");
+            GL.Viewport(0, 0, e.Width, e.Height);
+
+            BehaviourManager.FrameBufferResizeCall(e);
         }
-
-        protected override void OnUpdateFrame(FrameEventArgs e) => base.OnUpdateFrame(e);
-        protected override void OnMouseDown(MouseButtonEventArgs e) => base.OnMouseDown(e);
-
-        protected virtual void Start() { }
-        protected virtual void OnExit() { }
-        protected virtual void OnResize(FramebufferResizeEventArgs e) { }
-        protected virtual void Update(FrameEventArgs e) { }
-        protected virtual void LateUpdate(FrameEventArgs e) { }
-        protected virtual void FixedUpdate(FrameEventArgs e) { }
     }
 }
-
