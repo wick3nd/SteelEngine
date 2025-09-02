@@ -1,11 +1,12 @@
 using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace SteelEngine.SteelEngine.Base
 {
-    public class Camera
+    public class Camera : EngineScript
     {
-        public float fieldOfView = 90f;
+        public float fieldOfView = 60f;
 
         public Matrix4 view;
         public Matrix4 projection;
@@ -21,12 +22,13 @@ namespace SteelEngine.SteelEngine.Base
 
         private float _camYaw;
         private float _camPitch;
-        public readonly float sensitivity = 0.2f;
         public float speed = 2f;
+        public readonly float sensitivity = 0.2f;
+        public bool isCursorLocked = true;
 
         public Frustum frustum = new();
 
-        public Camera() 
+        public Camera()
         {
             _up = Vector3.UnitY;
             camPosition = new Vector3(0.0f, 0.0f, 3.0f);
@@ -44,11 +46,15 @@ namespace SteelEngine.SteelEngine.Base
             _camFront = new Vector3(0.0f, 0.0f, -1.0f);
         }
 
-        public void Update(WindowRes windowRes)
+        public override void Update(FrameEventArgs e)
         {
-            float aspectRatio = windowRes.height > 0 ? windowRes.width / (float)windowRes.height : 1f;
+            base.Update(e);
 
-            projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(fieldOfView), aspectRatio, 0.1f, 100f);
+            ProcessInput(KeyboardState!, MouseState!, (float)DeltaTime);
+
+            float aspectRatio = WindowHeight > 0 ? WindowWidth / (float)WindowHeight : 1f;
+
+            projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(fieldOfView), aspectRatio, 0.0001f, 10000f);
             view = Matrix4.LookAt(camPosition, camPosition + _camFront, _up);
 
             Matrix4 viewProj = view * projection;
@@ -79,7 +85,7 @@ namespace SteelEngine.SteelEngine.Base
 
             if (input.IsKeyDown(Keys.Space)) camPosition += _up * acceleration;    // Up
 
-            if (input.IsKeyDown(Keys.LeftShift))  camPosition -= _up * acceleration;    // Down
+            if (input.IsKeyDown(Keys.LeftShift)) camPosition -= _up * acceleration;    // Down
         }
 
         private void HandleMouse(MouseState mouse)
@@ -99,22 +105,20 @@ namespace SteelEngine.SteelEngine.Base
             _camFront.Normalize();
         }
 
-        public void ProcessInput(KeyboardState input, MouseState mouse, float deltaTime, ref bool cursorLocked, Action setCursorNormal, Action setCursorGrabbed)
+        public void ProcessInput(KeyboardState input, MouseState mouse, float deltaTime)
         {
-            HandleKeyboard(input, deltaTime);
-
             if (input.IsKeyPressed(Keys.Escape))
             {
-                cursorLocked = false;
-                setCursorNormal();
+                isCursorLocked = !isCursorLocked;
+                BehaviourManager.currentCursorState = CursorState.Normal;
             }
 
-            if (cursorLocked)
+            if (isCursorLocked)
             {
-                setCursorGrabbed();
+                BehaviourManager.currentCursorState = CursorState.Grabbed;
+                HandleKeyboard(input, deltaTime);
                 HandleMouse(mouse);
             }
         }
-
     }
 }
