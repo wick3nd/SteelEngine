@@ -1,5 +1,7 @@
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using SteelEngine.SteelMotion_Data.scripts;
+using Window = SteelEngine.SteelMotion_Data.scripts.Window;
 
 namespace SteelEngine
 {
@@ -13,11 +15,7 @@ namespace SteelEngine
         public int WindowWidth { get; set; }
         public int WindowHeight { get; set; }
         public double DeltaTime { get; set; }
-        public bool IsWindowFocused { get; set; }
-
-        public KeyboardState? KeyboardState { get; set; }
-        public MouseState? MouseState { get; set; }
-        public CursorState CursorState { get; set; }
+        public Window? WindowReference { get; set; }
 
         public virtual void OnStart() { }
         public virtual void OnExit() { }

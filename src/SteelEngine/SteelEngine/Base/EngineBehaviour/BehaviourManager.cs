@@ -1,7 +1,9 @@
 using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Linq.Expressions;
 using System.Reflection;
+using Window = SteelEngine.SteelMotion_Data.scripts.Window;
 
 namespace SteelEngine
 {
@@ -26,18 +28,9 @@ namespace SteelEngine
             }
         }
 
-        public static CursorState currentCursorState;
-        public static void ExposeKayboardState(KeyboardState state)
+        public static void ExposeWindow(Window window)
         {
-            for (int i = 0; i < behaviours.Count; i++) behaviours[i].KeyboardState = state;
-        }
-        public static void ExposeMouseState(MouseState state)
-        {
-            for (int i = 0; i < behaviours.Count; i++) behaviours[i].MouseState = state;
-        }
-        public static void ExposeCursorState(CursorState state)
-        {
-            for (int i = 0; i < behaviours.Count; i++) behaviours[i].CursorState = state;
+            for (int i = 0; i < behaviours.Count; i++) behaviours[i].WindowReference = window;
         }
         public static void ExposeWidth(int width)
         {
@@ -50,10 +43,6 @@ namespace SteelEngine
         public static void ExposeTime(double deltaTime)
         {
             for (int i = 0; i < behaviours.Count; i++) behaviours[i].DeltaTime = deltaTime;
-        }
-        public static void ExposeWindowFocus(bool isFocused)
-        {
-            for (int i = 0; i < behaviours.Count; i++) behaviours[i].IsWindowFocused = isFocused;
         }
         public static void StartCall()
         {

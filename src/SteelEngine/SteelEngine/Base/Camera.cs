@@ -50,9 +50,9 @@ namespace SteelEngine.SteelEngine.Base
         {
             base.Update(e);
 
-            ProcessInput(KeyboardState!, MouseState!, (float)DeltaTime);
+            ProcessInput(WindowReference!.KeyboardState!,WindowReference.MouseState!, (float)DeltaTime);
 
-            float aspectRatio = WindowHeight > 0 ? WindowWidth / (float)WindowHeight : 1f;
+            float aspectRatio = WindowWidth / (float)WindowHeight;
 
             projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(fieldOfView), aspectRatio, 0.0001f, 10000f);
             view = Matrix4.LookAt(camPosition, camPosition + _camFront, _up);
@@ -110,12 +110,12 @@ namespace SteelEngine.SteelEngine.Base
             if (input.IsKeyPressed(Keys.Escape))
             {
                 isCursorLocked = !isCursorLocked;
-                BehaviourManager.currentCursorState = CursorState.Normal;
+                WindowReference!.CursorState = CursorState.Normal;
             }
 
             if (isCursorLocked)
             {
-                BehaviourManager.currentCursorState = CursorState.Grabbed;
+                WindowReference!.CursorState = CursorState.Grabbed;
                 HandleKeyboard(input, deltaTime);
                 HandleMouse(mouse);
             }

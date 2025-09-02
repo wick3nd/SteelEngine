@@ -3,6 +3,7 @@ using OpenTK.Windowing.Desktop;
 using SteelEngine.Utils;
 using OpenTK.Windowing.Common;
 using OpenTK.Graphics.OpenGL;
+using SteelEngine.SteelMotion_Data.scripts;
 
 namespace SteelEngine
 {
@@ -10,6 +11,8 @@ namespace SteelEngine
     {
         private static double fixedTime;
         public double fixedTimeStep = .02;
+
+        public Window? PublicWindowReference;
 
         public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), MinimumClientSize = (256, 144), Title = title, Vsync = VSyncMode.Off, Flags = ContextFlags.Default/*, WindowBorder = WindowBorder.Fixed*/})
         {
@@ -22,7 +25,10 @@ namespace SteelEngine
 
             SEDebug.Log(SEDebugState.Log, "Created new window");
         }
-
+        public void SetWindow(Window window)
+        {
+            PublicWindowReference = window;
+        }
         protected override void OnLoad()
         {
             base.OnLoad();
@@ -38,6 +44,7 @@ namespace SteelEngine
 
             BehaviourManager.InitializeES();
             BehaviourManager.StartCall();
+            BehaviourManager.ExposeWindow(PublicWindowReference!);
         }
 
         protected override void OnUnload()
@@ -55,11 +62,7 @@ namespace SteelEngine
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            BehaviourManager.ExposeWindowFocus(IsFocused);
-            BehaviourManager.ExposeKayboardState(KeyboardState);
-            BehaviourManager.ExposeMouseState(MouseState);
-            BehaviourManager.ExposeCursorState(CursorState);
-            CursorState = BehaviourManager.currentCursorState;
+            BehaviourManager.ExposeWindow(PublicWindowReference!);
             BehaviourManager.ExposeTime(e.Time);
 
             fixedTime += e.Time;
