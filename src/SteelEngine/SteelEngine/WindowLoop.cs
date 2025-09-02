@@ -11,16 +11,14 @@ namespace SteelEngine
         private static double fixedTime;
         public double fixedTimeStep = .02;
 
-        public bool isWindowFocused;
-
-        public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), Title = title /*, Flags = ContextFlags.Default, WindowBorder = WindowBorder.Fixed */})
+        public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), MinimumClientSize = (256, 144), Title = title, Vsync = VSyncMode.Off, Flags = ContextFlags.Default/*, WindowBorder = WindowBorder.Fixed*/})
         {
+            if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
+
             CenterWindow(new Vector2i(width, height));
             
             BehaviourManager.ExposeWidth(width);
             BehaviourManager.ExposeHeight(height);
-
-            if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
 
             SEDebug.Log(SEDebugState.Log, "Created new window");
         }
@@ -57,7 +55,12 @@ namespace SteelEngine
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            isWindowFocused = IsFocused;
+            BehaviourManager.ExposeWindowFocus(IsFocused);
+            BehaviourManager.ExposeKayboardState(KeyboardState);
+            BehaviourManager.ExposeMouseState(MouseState);
+            BehaviourManager.ExposeCursorState(CursorState);
+            CursorState = BehaviourManager.currentCursorState;
+            BehaviourManager.ExposeTime(e.Time);
 
             fixedTime += e.Time;
 
@@ -69,8 +72,6 @@ namespace SteelEngine
 
             BehaviourManager.UpdateCall(e);
             BehaviourManager.LateUpdateCall(e);
-
-
 
             Context.SwapBuffers();
         }
