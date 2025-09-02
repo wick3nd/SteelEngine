@@ -11,15 +11,14 @@ namespace SteelEngine
         private static double fixedTime;
         public double fixedTimeStep = .02;
 
-        public int windowWidth;
-        public int windowHeight;
         public bool isWindowFocused;
 
         public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), Title = title /*, Flags = ContextFlags.Default, WindowBorder = WindowBorder.Fixed */})
         {
             CenterWindow(new Vector2i(width, height));
-            windowWidth = width;
-            windowHeight = height;
+            
+            BehaviourManager.ExposeWidth(width);
+            BehaviourManager.ExposeHeight(height);
 
             if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
 
@@ -29,9 +28,6 @@ namespace SteelEngine
         protected override void OnLoad()
         {
             base.OnLoad();
-
-            BehaviourManager.ExposeWidth(windowWidth);
-            BehaviourManager.ExposeHeight(windowHeight);
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -74,12 +70,17 @@ namespace SteelEngine
             BehaviourManager.UpdateCall(e);
             BehaviourManager.LateUpdateCall(e);
 
+
+
             Context.SwapBuffers();
         }
 
         protected override void OnResize(ResizeEventArgs e)
         {
             base.OnResize(e);
+
+            BehaviourManager.ExposeWidth(e.Width);
+            BehaviourManager.ExposeHeight(e.Height);
 
             BehaviourManager.ResizeCall(e);
         }
@@ -92,11 +93,6 @@ namespace SteelEngine
 
             SEDebug.Log(SEDebugState.Info, $"resized -- Width: {e.Width} Height: {e.Height}");
             GL.Viewport(0, 0, e.Width, e.Height);
-
-            windowHeight = e.Height;
-            windowWidth = e.Width;
-            BehaviourManager.ExposeWidth(e.Width);
-            BehaviourManager.ExposeHeight(e.Height);
 
             BehaviourManager.FrameBufferResizeCall(e);
         }
