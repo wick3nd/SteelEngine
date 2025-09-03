@@ -1,4 +1,5 @@
 using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
 
 namespace SteelEngine
 {
@@ -12,7 +13,7 @@ namespace SteelEngine
         public int WindowWidth { get; set; }
         public int WindowHeight { get; set; }
         public double DeltaTime { get; set; }
-        public WindowLoop? WindowReference { get; set; }
+        public NativeWindow? WindowReference { get; set; }
 
         public virtual void OnStart() { }
         public virtual void OnExit() { }
