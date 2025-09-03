@@ -1,9 +1,6 @@
 using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Linq.Expressions;
 using System.Reflection;
-using Window = SteelEngine.SteelMotion_Data.scripts.Window;
 
 namespace SteelEngine
 {
@@ -28,7 +25,7 @@ namespace SteelEngine
             }
         }
 
-        public static void ExposeWindow(Window window)
+        public static void ExposeWindow(WindowLoop window)
         {
             for (int i = 0; i < behaviours.Count; i++) behaviours[i].WindowReference = window;
         }
