@@ -11,7 +11,7 @@ namespace SteelEngine
         private static double fixedTime;
         public double fixedTimeStep = .02;
 
-        public WindowLoop? PublicWindowReference;
+        public NativeWindow? PublicWindowReference;
 
         public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), MinimumClientSize = (256, 144), Title = title, Vsync = VSyncMode.Off, Flags = ContextFlags.Default/*, WindowBorder = WindowBorder.Fixed*/})
         {
