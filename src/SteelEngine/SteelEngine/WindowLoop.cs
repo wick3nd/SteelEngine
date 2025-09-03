@@ -11,6 +11,8 @@ namespace SteelEngine
         private static double fixedTime;
         public double fixedTimeStep = .02;
 
+        public NativeWindow? PublicWindowReference;
+
         public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), MinimumClientSize = (256, 144), Title = title, Vsync = VSyncMode.Off, Flags = ContextFlags.Default/*, WindowBorder = WindowBorder.Fixed*/})
         {
             if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
@@ -21,8 +23,9 @@ namespace SteelEngine
             BehaviourManager.ExposeHeight(height);
 
             SEDebug.Log(SEDebugState.Log, "Created new window");
-        }
 
+            PublicWindowReference = this;
+        }
         protected override void OnLoad()
         {
             base.OnLoad();
@@ -38,6 +41,7 @@ namespace SteelEngine
 
             BehaviourManager.InitializeES();
             BehaviourManager.StartCall();
+            BehaviourManager.ExposeWindow(PublicWindowReference!);
         }
 
         protected override void OnUnload()
@@ -55,11 +59,7 @@ namespace SteelEngine
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            BehaviourManager.ExposeWindowFocus(IsFocused);
-            BehaviourManager.ExposeKayboardState(KeyboardState);
-            BehaviourManager.ExposeMouseState(MouseState);
-            BehaviourManager.ExposeCursorState(CursorState);
-            CursorState = BehaviourManager.currentCursorState;
+            BehaviourManager.ExposeWindow(PublicWindowReference!);
             BehaviourManager.ExposeTime(e.Time);
 
             fixedTime += e.Time;
