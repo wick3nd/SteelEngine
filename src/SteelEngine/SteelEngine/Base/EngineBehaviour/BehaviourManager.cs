@@ -1,4 +1,5 @@
 using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -25,7 +26,7 @@ namespace SteelEngine
             }
         }
 
-        public static void ExposeWindow(WindowLoop window)
+        public static void ExposeWindow(NativeWindow window)
         {
             for (int i = 0; i < behaviours.Count; i++) behaviours[i].WindowReference = window;
         }
