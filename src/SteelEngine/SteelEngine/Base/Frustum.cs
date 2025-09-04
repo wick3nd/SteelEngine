@@ -1,75 +1,77 @@
 using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 
 namespace SteelEngine.SteelEngine.Base
 {
-    public class Frustum
+    public class Frustum : EngineScript
     {
         public Plane[] planes = new Plane[6];
+        public Matrix4 viewProjection;
 
-        public void Update(Matrix4 viewProjection)    // use EngineScript update
+        public override void Update(FrameEventArgs e)
         {
+            base.Update(e);
+
             // left plane
-            planes[0] = new Plane(
+            planes[0] = new Plane(new Vector4(
                 viewProjection.M14 + viewProjection.M11,
                 viewProjection.M24 + viewProjection.M21,
                 viewProjection.M34 + viewProjection.M31,
                 viewProjection.M44 + viewProjection.M41
-            ).Normalize();
+            )).Normalize();
 
             // right plane
-            planes[1] = new Plane(
+            planes[1] = new Plane(new Vector4(
                 viewProjection.M14 - viewProjection.M11,
                 viewProjection.M24 - viewProjection.M21,
                 viewProjection.M34 - viewProjection.M31,
                 viewProjection.M44 - viewProjection.M41
-            ).Normalize();
+            )).Normalize();
 
-            // lower plane
-            planes[2] = new Plane(
+            // bottom plane
+            planes[2] = new Plane(new Vector4(
                 viewProjection.M14 + viewProjection.M12,
                 viewProjection.M24 + viewProjection.M22,
                 viewProjection.M34 + viewProjection.M32,
                 viewProjection.M44 + viewProjection.M42
-            ).Normalize();
+            )).Normalize();
 
             // upper plane
-            planes[3] = new Plane(
+            planes[3] = new Plane(new Vector4(
                 viewProjection.M14 - viewProjection.M12,
                 viewProjection.M24 - viewProjection.M22,
                 viewProjection.M34 - viewProjection.M32,
                 viewProjection.M44 - viewProjection.M42
-            ).Normalize();
+            )).Normalize();
 
             // near plane
-            planes[4] = new Plane(
+            planes[4] = new Plane(new Vector4(
                 viewProjection.M14 + viewProjection.M13,
                 viewProjection.M24 + viewProjection.M23,
                 viewProjection.M34 + viewProjection.M33,
                 viewProjection.M44 + viewProjection.M43
-            ).Normalize();
+            )).Normalize();
 
             // far plane
-            planes[5] = new Plane(
+            planes[5] = new Plane(new Vector4(
                 viewProjection.M14 - viewProjection.M13,
                 viewProjection.M24 - viewProjection.M23,
                 viewProjection.M34 - viewProjection.M33,
                 viewProjection.M44 - viewProjection.M43
-            ).Normalize();
+            )).Normalize();
         }
     }
 
-    public struct Plane(float a, float b, float c, float d)    // use more informative names perhaps?
+    public readonly struct Plane(Vector4 vec)
     {
-        public Vector3 Normal = new(a, b, c);
-        float D = d;
+        private readonly Vector4 _vec = vec;
 
-        public void Normalize()
+        public readonly Plane Normalize()
         {
-            float length = Normal.Length;    // its a fixed size - put it in struct to not make new one evey time normalize is called
-            Normal /= length;
-            D /= length;
+            float len = _vec.Length;
+            return new Plane(_vec / len);
         }
 
-        public readonly float DistanceToPoint(Vector3 point) => Vector3.Dot(Normal, point) + D;
+        public readonly float DistanceToPoint(Vector3 point) => Vector3.Dot(new Vector3(_vec.X, _vec.Y, _vec.Z), point) + _vec.W;
     }
 }
