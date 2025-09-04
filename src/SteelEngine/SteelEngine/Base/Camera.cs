@@ -6,6 +6,8 @@ namespace SteelEngine.SteelEngine.Base
 {
     public class Camera : EngineScript
     {
+        public float farPlaneDist = 80f;
+        public float nearPlaneDist = 0.001f;
         public float fieldOfView = 60f;
 
         public static Matrix4 view;
@@ -54,7 +56,7 @@ namespace SteelEngine.SteelEngine.Base
 
             float aspectRatio = WindowWidth / (float)WindowHeight;
 
-            projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(fieldOfView), aspectRatio, 0.0001f, 10000f);
+            projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(fieldOfView), aspectRatio, nearPlaneDist, farPlaneDist);
             view = Matrix4.LookAt(camPosition, camPosition + _camFront, _up);
         }
 
