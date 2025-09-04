@@ -8,8 +8,8 @@ namespace SteelEngine.SteelEngine.Base
     {
         public float fieldOfView = 60f;
 
-        public Matrix4 view;
-        public Matrix4 projection;
+        public static Matrix4 view;
+        public static Matrix4 projection;
 
         public Vector3 camPosition;
         public Vector3 camTarget;
@@ -56,9 +56,6 @@ namespace SteelEngine.SteelEngine.Base
 
             projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(fieldOfView), aspectRatio, 0.0001f, 10000f);
             view = Matrix4.LookAt(camPosition, camPosition + _camFront, _up);
-
-            Matrix4 viewProj = view * projection;
-            frustum.viewProjection = viewProj;
         }
 
         public bool IsSphereVisible(Vector3 center, float radius)
