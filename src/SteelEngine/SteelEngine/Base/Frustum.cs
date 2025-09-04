@@ -1,5 +1,6 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
+using SteelEngine.Base.Structs;
 
 namespace SteelEngine.SteelEngine.Base
 {
@@ -60,18 +61,5 @@ namespace SteelEngine.SteelEngine.Base
                 viewProjection.M44 - viewProjection.M43
             )).Normalize();
         }
-    }
-
-    public readonly struct Plane(Vector4 vec)
-    {
-        private readonly Vector4 _vec = vec;
-
-        public readonly Plane Normalize()
-        {
-            float len = _vec.Length;
-            return new Plane(_vec / len);
-        }
-
-        public readonly float DistanceToPoint(Vector3 point) => Vector3.Dot(new Vector3(_vec.X, _vec.Y, _vec.Z), point) + _vec.W;
     }
 }
