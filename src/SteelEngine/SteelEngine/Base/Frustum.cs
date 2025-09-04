@@ -14,7 +14,7 @@ namespace SteelEngine.SteelEngine.Base
                 viewProjection.M24 + viewProjection.M21,
                 viewProjection.M34 + viewProjection.M31,
                 viewProjection.M44 + viewProjection.M41
-            );
+            ).Normalize();
 
             // prawa
             planes[1] = new Plane(
@@ -22,7 +22,7 @@ namespace SteelEngine.SteelEngine.Base
                 viewProjection.M24 - viewProjection.M21,
                 viewProjection.M34 - viewProjection.M31,
                 viewProjection.M44 - viewProjection.M41
-            );
+            ).Normalize();
 
             // dolna
             planes[2] = new Plane(
@@ -30,7 +30,7 @@ namespace SteelEngine.SteelEngine.Base
                 viewProjection.M24 + viewProjection.M22,
                 viewProjection.M34 + viewProjection.M32,
                 viewProjection.M44 + viewProjection.M42
-            );
+            ).Normalize();
 
             // gorna
             planes[3] = new Plane(
@@ -38,7 +38,7 @@ namespace SteelEngine.SteelEngine.Base
                 viewProjection.M24 - viewProjection.M22,
                 viewProjection.M34 - viewProjection.M32,
                 viewProjection.M44 - viewProjection.M42
-            );
+            ).Normalize();
 
             // ta bliska
             planes[4] = new Plane(
@@ -46,7 +46,7 @@ namespace SteelEngine.SteelEngine.Base
                 viewProjection.M24 + viewProjection.M23,
                 viewProjection.M34 + viewProjection.M33,
                 viewProjection.M44 + viewProjection.M43
-            );
+            ).Normalize();
 
             // ta z tylu
             planes[5] = new Plane(
@@ -54,9 +54,8 @@ namespace SteelEngine.SteelEngine.Base
                 viewProjection.M24 - viewProjection.M23,
                 viewProjection.M34 - viewProjection.M33,
                 viewProjection.M44 - viewProjection.M43
-            );
+            ).Normalize();
 
-            for (int i = 0; i < 6; i++) planes[i].Normalize();
         }
     }
 
@@ -71,7 +70,7 @@ namespace SteelEngine.SteelEngine.Base
             d /= length;
         }
 
-        public readonly float DistanceToPoint(Vector3 point) => Vector3.Dot(Normal, point) + D;
+        public readonly float DistanceToPoint(Vector3 point) => Vector3.Dot(Normal, point) + d;
     }
 
 }
