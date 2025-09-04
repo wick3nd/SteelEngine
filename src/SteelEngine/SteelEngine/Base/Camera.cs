@@ -58,12 +58,12 @@ namespace SteelEngine.SteelEngine.Base
             view = Matrix4.LookAt(camPosition, camPosition + _camFront, _up);
 
             Matrix4 viewProj = view * projection;
-            frustum.Update(viewProj);
+            frustum.viewProjection = viewProj;
         }
 
         public bool IsSphereVisible(Vector3 center, float radius)
         {
-            for (int i = 0; i != frustum.planes.Length; i++)
+            for (int i = 0; i != 6; i++)
             {
                 if (frustum.planes[i].DistanceToPoint(center) < -radius) return false;
             }
