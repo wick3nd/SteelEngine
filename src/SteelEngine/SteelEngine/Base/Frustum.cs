@@ -63,13 +63,12 @@ namespace SteelEngine.SteelEngine.Base
     public struct Plane(float a, float b, float c, float d)
     {
         public Vector3 Normal = new(a, b, c);
-        public float D = d;
 
         public void Normalize()
         {
             float length = Normal.Length;
             Normal /= length;
-            D /= length;
+            d /= length;
         }
 
         public readonly float DistanceToPoint(Vector3 point) => Vector3.Dot(Normal, point) + D;
