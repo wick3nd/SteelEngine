@@ -48,6 +48,26 @@ namespace SteelEngine.Base
                 TexCoord = vec2(aTexCoord.x * tilingX, aTexCoord.y * tilingY);
             }
             """;
+
+        public const string defaultInstancingVert = """
+            #version 330 core
+            layout (location = 0) in vec3 aPosition;
+            layout (location = 1) in vec2 aTexCoord;
+            layout (location = 2) in mat4 instanceModel;
+            
+            out vec2 TexCoord;
+            
+            uniform float tilingX = 1.0f;
+            uniform float tilingY = 1.0f;
+            uniform mat4 projection = mat4(1.0f);
+            uniform mat4 view;
+            
+            void main()
+            {
+                gl_Position =  projection * view * instanceModel * vec4(aPosition, 1.0f);
+                TexCoord = vec2(aTexCoord.x * tilingX, aTexCoord.y * tilingY);
+            }
+            """;
         //===================================================================
 
         public Shader(string fragmentSource = defaultFrag, string vertexSource = defaultVert)

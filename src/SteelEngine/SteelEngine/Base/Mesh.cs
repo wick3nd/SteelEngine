@@ -1,4 +1,6 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using System.Runtime.InteropServices;
+using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 using SteelEngine.Utils;
 
 namespace SteelEngine.Base
@@ -47,12 +49,12 @@ namespace SteelEngine.Base
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _instanceVerexBufferObject);
+            //GL.BindBuffer(BufferTarget.ArrayBuffer, _instanceVerexBufferObject);
 
             GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, buh);
             GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, buh);
 
-            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, buh);
+            //GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, buh);
 
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
             GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
@@ -63,9 +65,30 @@ namespace SteelEngine.Base
             SEDebug.Log(SEDebugState.Info, $"Created a mesh {path} from offset {offset}");
         }
 
-        public void Draw(PrimitiveType type = PrimitiveType.Triangles, int instanceCount = 1)
+        public void Draw(PrimitiveType type = PrimitiveType.Triangles)
         {
             GL.BindVertexArray(_vertexArrayObject);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _instanceVerexBufferObject);
+            GL.DrawElementsInstanced(type, _indices.Length, DrawElementsType.UnsignedInt, IntPtr.Zero, 1);
+        }
+
+        public void InstancingDraw(Matrix4[] instanceData, int attributeLocation, int instanceCount = 1, PrimitiveType type = PrimitiveType.Triangles)
+        {
+            GL.BindVertexArray(_vertexArrayObject);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _instanceVerexBufferObject);
+
+            int size = instanceData.Length * Marshal.SizeOf<Matrix4>();
+            GL.BufferData(BufferTarget.ArrayBuffer, size, instanceData, BufferUsageHint.StaticDraw);
+
+            for (int i = 0; i < 4; i++)
+            {
+                int loc = attributeLocation + i;
+                GL.EnableVertexAttribArray(loc);
+                GL.VertexAttribPointer(loc, 4, VertexAttribPointerType.Float, false,
+                    64, (IntPtr)(i * 16));
+                GL.VertexAttribDivisor(loc, 1);
+            }
+
             GL.DrawElementsInstanced(type, _indices.Length, DrawElementsType.UnsignedInt, IntPtr.Zero, instanceCount);
         }
 
