@@ -1,4 +1,4 @@
-﻿using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using SteelEngine.Utils;
 
@@ -11,6 +11,7 @@ namespace SteelEngine.Base
         private readonly int _FragmentShader;
 
         // Default shaders ==================================================
+
         public const string defaultFrag = """
             #version 330 core
             in vec2 TexCoord;
@@ -26,6 +27,26 @@ namespace SteelEngine.Base
 
                 float pulse = abs(sin(time));
                 FragColor = mix(image0, image1, image1.a * pulse);
+            }
+            """;
+
+        public const string depthVisualizeFrag = """
+            #version 330 core
+            out vec4 FragColor;
+
+            float near = 0.001f;
+            float far  = 100.0f;
+
+            float LinearizeDepth(float depth)
+            {
+                float z = depth * 2.0 - 1.0;
+                return (2.0 * near * far) / (far + near - z * (far - near));
+            }
+
+            void main()
+            {             
+                float depth = LinearizeDepth(gl_FragCoord.z) / far;
+                FragColor = vec4(vec3(depth), 1.0);
             }
             """;
 
@@ -68,6 +89,7 @@ namespace SteelEngine.Base
                 TexCoord = vec2(aTexCoord.x * tilingX, aTexCoord.y * tilingY);
             }
             """;
+
         //===================================================================
 
         public Shader(string fragmentSource = defaultFrag, string vertexSource = defaultVert)
