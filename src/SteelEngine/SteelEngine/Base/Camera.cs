@@ -6,7 +6,7 @@ namespace SteelEngine.SteelEngine.Base
 {
     public class Camera : EngineScript
     {
-        public float farPlaneDist = 80f;
+        public float farPlaneDist = 100f;
         public float nearPlaneDist = 0.001f;
         public float fieldOfView = 60f;
 
@@ -52,7 +52,7 @@ namespace SteelEngine.SteelEngine.Base
         {
             base.Update(e);
 
-            ProcessInput(WindowReference!.KeyboardState!,WindowReference.MouseState!, (float)DeltaTime);
+            ProcessInput(WindowReference!.KeyboardState!, WindowReference.MouseState!, (float)DeltaTime);
 
             float aspectRatio = WindowWidth / (float)WindowHeight;
 
