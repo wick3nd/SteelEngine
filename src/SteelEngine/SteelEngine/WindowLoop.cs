@@ -1,14 +1,15 @@
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
-using OpenTK.Windowing.Desktop;
-using SteelEngine.Utils;
 using OpenTK.Windowing.Common;
-using OpenTK.Graphics.OpenGL;
+using OpenTK.Windowing.Desktop;
+using SteelEngine.SteelEngine.Base;
+using SteelEngine.Utils;
 
 namespace SteelEngine
 {
     public class WindowLoop : GameWindow
     {
-        private static double fixedTime;
+        private static double fixedUpdateTimer;
         public double fixedTimeStep = .02;
 
         public NativeWindow? PublicWindowReference;
@@ -18,9 +19,6 @@ namespace SteelEngine
             if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
 
             CenterWindow(new Vector2i(width, height));
-            
-            BehaviourManager.ExposeWidth(width);
-            BehaviourManager.ExposeHeight(height);
 
             SEDebug.Log(SEDebugState.Log, "Created new window");
 
@@ -36,6 +34,7 @@ namespace SteelEngine
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);
 
+            // GL.DepthFunc(DepthFunction.Notequal);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.BlendEquation(BlendEquationMode.FuncAdd);
 
@@ -62,12 +61,12 @@ namespace SteelEngine
             BehaviourManager.ExposeWindow(PublicWindowReference!);
             BehaviourManager.ExposeTime(e.Time);
 
-            fixedTime += e.Time;
+            fixedUpdateTimer += e.Time;
 
-            if (fixedTime >= fixedTimeStep)
+            if (fixedUpdateTimer >= fixedTimeStep)
             {
                 BehaviourManager.FixedUpdateCall(e);
-                fixedTime = 0;
+                fixedUpdateTimer = 0f;
             }
 
             BehaviourManager.UpdateCall(e);
@@ -79,10 +78,10 @@ namespace SteelEngine
         protected override void OnResize(ResizeEventArgs e)
         {
             base.OnResize(e);
+            SEDebug.Log(SEDebugState.Info, $"Window resized -- {e.Width}x{e.Height}");
 
             BehaviourManager.ExposeWidth(e.Width);
             BehaviourManager.ExposeHeight(e.Height);
-
             BehaviourManager.ResizeCall(e);
         }
 
@@ -90,9 +89,6 @@ namespace SteelEngine
         {
             base.OnFramebufferResize(e);
 
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            SEDebug.Log(SEDebugState.Info, $"resized -- Width: {e.Width} Height: {e.Height}");
             GL.Viewport(0, 0, e.Width, e.Height);
 
             BehaviourManager.FrameBufferResizeCall(e);

@@ -1,78 +1,66 @@
 using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
+using SteelEngine.Base.Structs;
 
 namespace SteelEngine.SteelEngine.Base
 {
-    public class Frustum
+    public class Frustum : EngineScript
     {
         public Plane[] planes = new Plane[6];
 
-        public void Update(Matrix4 viewProjection)
+        public override void Update(FrameEventArgs e)
         {
-            // lewa
-            planes[0] = new Plane(
-                viewProjection.M14 + viewProjection.M11,
-                viewProjection.M24 + viewProjection.M21,
-                viewProjection.M34 + viewProjection.M31,
-                viewProjection.M44 + viewProjection.M41
-            );
+            base.Update(e);
+            
+            Matrix4 _viewProjection = Camera.view * Camera.projection;
 
-            // prawa
-            planes[1] = new Plane(
-                viewProjection.M14 - viewProjection.M11,
-                viewProjection.M24 - viewProjection.M21,
-                viewProjection.M34 - viewProjection.M31,
-                viewProjection.M44 - viewProjection.M41
-            );
+            // left plane
+            planes[0] = new Plane(new Vector4(
+                _viewProjection.M14 + _viewProjection.M11,
+                _viewProjection.M24 + _viewProjection.M21,
+                _viewProjection.M34 + _viewProjection.M31,
+                _viewProjection.M44 + _viewProjection.M41
+            )).Normalize();
 
-            // dolna
-            planes[2] = new Plane(
-                viewProjection.M14 + viewProjection.M12,
-                viewProjection.M24 + viewProjection.M22,
-                viewProjection.M34 + viewProjection.M32,
-                viewProjection.M44 + viewProjection.M42
-            );
+            // right plane
+            planes[1] = new Plane(new Vector4(
+                _viewProjection.M14 - _viewProjection.M11,
+                _viewProjection.M24 - _viewProjection.M21,
+                _viewProjection.M34 - _viewProjection.M31,
+                _viewProjection.M44 - _viewProjection.M41
+            )).Normalize();
 
-            // gorna
-            planes[3] = new Plane(
-                viewProjection.M14 - viewProjection.M12,
-                viewProjection.M24 - viewProjection.M22,
-                viewProjection.M34 - viewProjection.M32,
-                viewProjection.M44 - viewProjection.M42
-            );
+            // bottom plane
+            planes[2] = new Plane(new Vector4(
+                _viewProjection.M14 + _viewProjection.M12,
+                _viewProjection.M24 + _viewProjection.M22,
+                _viewProjection.M34 + _viewProjection.M32,
+                _viewProjection.M44 + _viewProjection.M42
+            )).Normalize();
 
-            // ta bliska
-            planes[4] = new Plane(
-                viewProjection.M14 + viewProjection.M13,
-                viewProjection.M24 + viewProjection.M23,
-                viewProjection.M34 + viewProjection.M33,
-                viewProjection.M44 + viewProjection.M43
-            );
+            // upper plane
+            planes[3] = new Plane(new Vector4(
+                _viewProjection.M14 - _viewProjection.M12,
+                _viewProjection.M24 - _viewProjection.M22,
+                _viewProjection.M34 - _viewProjection.M32,
+                _viewProjection.M44 - _viewProjection.M42
+            )).Normalize();
 
-            // ta z tylu
-            planes[5] = new Plane(
-                viewProjection.M14 - viewProjection.M13,
-                viewProjection.M24 - viewProjection.M23,
-                viewProjection.M34 - viewProjection.M33,
-                viewProjection.M44 - viewProjection.M43
-            );
+            // near plane
+            planes[4] = new Plane(new Vector4(
+                _viewProjection.M14 + _viewProjection.M13,
+                _viewProjection.M24 + _viewProjection.M23,
+                _viewProjection.M34 + _viewProjection.M33,
+                _viewProjection.M44 + _viewProjection.M43
+            )).Normalize();
 
-            for (int i = 0; i < 6; i++) planes[i].Normalize();
+            // far plane
+            planes[5] = new Plane(new Vector4(
+                _viewProjection.M14 - _viewProjection.M13,
+                _viewProjection.M24 - _viewProjection.M23,
+                _viewProjection.M34 - _viewProjection.M33,
+                _viewProjection.M44 - _viewProjection.M43
+            )).Normalize();
         }
     }
-
-    public struct Plane(float a, float b, float c, float d)
-    {
-        public Vector3 Normal = new(a, b, c);
-        public float D = d;
-
-        public void Normalize()
-        {
-            float length = Normal.Length;
-            Normal /= length;
-            D /= length;
-        }
-
-        public readonly float DistanceToPoint(Vector3 point) => Vector3.Dot(Normal, point) + D;
-    }
-
 }

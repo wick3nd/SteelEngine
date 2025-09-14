@@ -1,4 +1,4 @@
-using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL4;
 using StbImageSharp;
 using SteelEngine.Utils;
 
@@ -7,9 +7,7 @@ namespace SteelEngine.Base
     class   Texture2D : IDisposable
     {
         private readonly int _Handle;
-
         private readonly TextureUnit _unit;
-
 
         public Texture2D(string path = "", TextureUnit unit = TextureUnit.Texture0, bool generateMipmap = true, PixelInternalFormat pixelFormat = PixelInternalFormat.Rgba, PixelType pixelType = PixelType.UnsignedByte)
         {
@@ -71,9 +69,9 @@ namespace SteelEngine.Base
 
         public int Handle => _Handle;
 
-        public void Use()
+        public void Use(TextureUnit unit = TextureUnit.Texture0)
         {
-            GL.ActiveTexture(_unit);
+            GL.ActiveTexture(unit);
             GL.BindTexture(TextureTarget.Texture2D, _Handle);
         }
 
