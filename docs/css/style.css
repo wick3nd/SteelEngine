@@ -1,0 +1,25 @@
+body {
+    background-image: radial-gradient(circle, rgb(43, 82, 255), rgb(5, 11, 99));
+    font-family: "Arial";
+    
+}
+
+h3, h2 {
+    color: white;
+}
+
+h1, h4 {
+    color: white;
+    text-align: center;
+}
+
+a {
+    color: rgb(21, 238, 238);
+    font-size: 16px;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    height: 2.5rem;  
+}
