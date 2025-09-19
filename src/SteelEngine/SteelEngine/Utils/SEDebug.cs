@@ -1,7 +1,8 @@
-﻿namespace SteelEngine.Utils
+namespace SteelEngine.Utils
 {
     public enum SEDebugState
     {
+        Debug,
         Log,
         Info,
         Warning,
@@ -30,6 +31,8 @@
 
                 case SEDebugState.Error: Console.ForegroundColor = ConsoleColor.DarkRed;
                     break;
+
+                default: break;
             }
 
             Console.Write($"{log}\n");
