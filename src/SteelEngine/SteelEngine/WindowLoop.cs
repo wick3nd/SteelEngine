@@ -10,7 +10,7 @@ namespace SteelEngine
     public class WindowLoop : GameWindow
     {
         private static double fixedUpdateTimer;
-        public double fixedTimeStep = .02;
+        public double fixedTimeStep = .016;
 
         public NativeWindow? PublicWindowReference;
 
