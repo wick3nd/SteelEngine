@@ -1,10 +1,10 @@
-using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL;
 using StbImageSharp;
 using SteelEngine.Utils;
 
 namespace SteelEngine.Base
 {
-    class   Texture2D : IDisposable
+    class   Texture2D : EngineScript, IDisposable
     {
         private readonly int _Handle;
         private readonly TextureUnit _unit;
@@ -28,8 +28,7 @@ namespace SteelEngine.Base
 
             if (path == "" || !File.Exists(path))
             {
-                byte[] imgData = [ 0xFF, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0xFF ];
-                GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
+                byte[] imgData = [ 0xFF, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0xFF ];
                 GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, 2, 2, 0, PixelFormat.Rgb, PixelType.UnsignedByte, imgData);
 
                 SEDebug.Log(SEDebugState.Error, $"Created a missing Texture2D handle {_Handle}");
@@ -51,6 +50,7 @@ namespace SteelEngine.Base
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
         }
 
+
         public void ChangeWrapMode(TextureWrapMode wrapModeS, TextureWrapMode wrapModeT)
         {
             GL.ActiveTexture(_unit);
@@ -58,6 +58,7 @@ namespace SteelEngine.Base
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrapModeS);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrapModeT);
         }
+
 
         public void ChangeFilterMode(TextureMinFilter filterMin = TextureMinFilter.NearestMipmapNearest, TextureMagFilter FilterMag = TextureMagFilter.Nearest)
         {
@@ -67,6 +68,7 @@ namespace SteelEngine.Base
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)FilterMag);
         }
 
+
         public int Handle => _Handle;
 
         public void Use(TextureUnit unit = TextureUnit.Texture0)
@@ -75,11 +77,16 @@ namespace SteelEngine.Base
             GL.BindTexture(TextureTarget.Texture2D, _Handle);
         }
 
+
         public void UnBind()
         {
             GL.ActiveTexture(_unit);
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }
+
+
+        public override void OnExit() => Dispose();
+
 
         private bool disposedValue = false;
 
@@ -94,6 +101,7 @@ namespace SteelEngine.Base
             }
         }
 
+
         ~Texture2D()
         {
             if (disposedValue == false)
@@ -101,6 +109,7 @@ namespace SteelEngine.Base
                 SEDebug.Log(SEDebugState.Warning, "GPU Resource leak, did you forget to call Dispose()?");
             }
         }
+
 
         public void Dispose()
         {
