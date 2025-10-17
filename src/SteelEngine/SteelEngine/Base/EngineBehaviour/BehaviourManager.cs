@@ -1,78 +1,69 @@
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using System.Linq.Expressions;
-using System.Reflection;
 
 namespace SteelEngine
 {
-    public static class BehaviourManager
+    internal static class BehaviourManager
     {
         private static readonly List<EngineScript> behaviours = [];
+        internal static void Add(EngineScript script) => behaviours.Add(script);    // EngineScript methods to run
 
-        public static void Add(EngineScript script) => behaviours.Add(script);    // EngineScript methods to run
 
-        private static readonly Type[] _engineScriptTypes = [.. Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsSubclassOf(typeof(EngineScript)) && !t.IsAbstract)];    // EngineScripts to run
-        public static void InitializeES()
+        internal static void ExposeWindow(NativeWindow window)
         {
-            for (int i = 0; i < _engineScriptTypes.Length; i++)
+            for (int i = 0; i < behaviours.Count; i++) behaviours[i].windowReference = window;
+        }
+        internal static void ExposeResolution(int width, int height)
+        {
+            for (int i = 0; i < behaviours.Count; i++)
             {
-                var ctor = _engineScriptTypes[i].GetConstructor(Type.EmptyTypes);
-                if (ctor != null)
-                {
-                    var newExpr = Expression.New(ctor);
-                    var lambda = Expression.Lambda<Func<EngineScript>>(newExpr).Compile();
-                    lambda();
-                }
+                behaviours[i].windowWidth = width;
+                behaviours[i].windowHeight = height;
             }
         }
-
-        public static void ExposeWindow(NativeWindow window)
+        internal static void ExposeTime(double deltaTime)
         {
-            for (int i = 0; i < behaviours.Count; i++) behaviours[i].WindowReference = window;
+            for (int i = 0; i < behaviours.Count; i++)
+            {
+                behaviours[i].deltaTime = (float)deltaTime;
+                behaviours[i].deltaTimeD = deltaTime;
+            }
         }
-        public static void ExposeWidth(int width)
-        {
-            for (int i = 0; i < behaviours.Count; i++) behaviours[i].WindowWidth = width;
-        }
-        public static void ExposeHeight(int height)
-        {
-            for (int i = 0; i < behaviours.Count; i++) behaviours[i].WindowHeight = height;
-        }
-        public static void ExposeTime(double deltaTime)
-        {
-            for (int i = 0; i < behaviours.Count; i++) behaviours[i].DeltaTime = deltaTime;
-        }
-        public static void StartCall()
+        internal static void StartCall()
         {
             for (int i = 0; i < behaviours.Count; i++) behaviours[i].OnStart();
         }
-        public static void ExitCall()
+        internal static void ExitCall()
         {
             for (int i = 0; i < behaviours.Count; i++) behaviours[i].OnExit();
         }
-        public static void ResizeCall(ResizeEventArgs e)
+        internal static void ResizeCall(ResizeEventArgs e)
         {
             for (int i = 0; i < behaviours.Count; i++) behaviours[i].OnResize(e);
         }
-        public static void FrameBufferResizeCall(FramebufferResizeEventArgs e)
+        internal static void FrameBufferResizeCall(FramebufferResizeEventArgs e)
         {
             for (int i = 0; i < behaviours.Count; i++) behaviours[i].OnFrameBufferResize(e);
         }
-        public static void FrameUpdateCall(FrameEventArgs e)
+        internal static void FrameUpdateCall(FrameEventArgs args)
         {
-            for (int i = 0; i < behaviours.Count; i++) behaviours[i].OnFrameUpdate(e);
+            for (int i = 0; i < behaviours.Count; i++) behaviours[i].OnFrameUpdate(args);
         }
-        public static void UpdateCall(FrameEventArgs e)
+        internal static void UpdateCall(FrameEventArgs e)
         {
             for (int i = 0; i < behaviours.Count; i++) behaviours[i].Update(e);
         }
-        public static void LateUpdateCall(FrameEventArgs e)
+        internal static void LateUpdateCall(FrameEventArgs e)
         {
             for (int i = 0; i < behaviours.Count; i++) behaviours[i].LateUpdate(e);
         }
-        public static void FixedUpdateCall(FrameEventArgs e)
+        internal static void FixedUpdateCall(FrameEventArgs e)
         {
             for (int i = 0; i < behaviours.Count; i++) behaviours[i].FixedUpdate(e);
+        }
+        internal static void AfterBufferSwap(FrameEventArgs e)
+        {
+            for (int i = 0; i < behaviours.Count; i++) behaviours[i].AfterBufferSwap(e);
         }
     }
 }
