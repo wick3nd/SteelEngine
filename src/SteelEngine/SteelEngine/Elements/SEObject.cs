@@ -1,7 +1,6 @@
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using SteelEngine.Base;
-using SteelMotion.SteelEngine.Base;
 
 namespace SteelEngine.Elements
 {
@@ -32,3 +31,4 @@ namespace SteelEngine.Elements
         }
     }
 }
+
