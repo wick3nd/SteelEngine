@@ -1,7 +1,7 @@
 using OpenTK.Graphics.OpenGL;
 using SteelEngine.Base;
 
-namespace SteelMotion.SteelEngine.Elements
+namespace SteelEngine.Elements
 {
     internal class Material
     {
@@ -29,3 +29,4 @@ namespace SteelMotion.SteelEngine.Elements
         }
     }
 }
+
