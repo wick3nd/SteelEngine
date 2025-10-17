@@ -1,19 +1,22 @@
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace SteelEngine
 {
-    public class EngineScript
+    public abstract class EngineScript
     {
-        protected EngineScript()
-        {
-            BehaviourManager.Add(this);
-        }
+        protected EngineScript() => BehaviourManager.Add(this);
 
-        public int WindowWidth { get; set; }
-        public int WindowHeight { get; set; }
-        public double DeltaTime { get; set; }
-        public NativeWindow? WindowReference { get; set; }
+        public int windowWidth;
+        public int windowHeight;
+
+        public float deltaTime;
+        public double deltaTimeD;
+
+        public NativeWindow? windowReference;
+        public KeyboardState? keyboardState;
+        public MouseState? mouseState;
 
         public virtual void OnStart() { }
         public virtual void OnExit() { }
@@ -23,6 +26,7 @@ namespace SteelEngine
         public virtual void Update(FrameEventArgs e) { }
         public virtual void LateUpdate(FrameEventArgs e) { }
         public virtual void FixedUpdate(FrameEventArgs e) { }
+        public virtual void AfterBufferSwap(FrameEventArgs e) { }
 
         public virtual void IsMousePressed(MouseButtonEventArgs e) { }
     }
