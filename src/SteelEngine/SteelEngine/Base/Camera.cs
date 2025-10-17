@@ -1,43 +1,34 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace SteelEngine.SteelEngine.Base
+namespace SteelEngine.Base
 {
     public class Camera : EngineScript
     {
-        public float farPlaneDist = 100f;
-        public float nearPlaneDist = 0.001f;
-        public float fieldOfView = 60f;
+        public float FarPlaneDist { get; set; } = 100f;
+        public float NearPlaneDist { get; set; } = 0.001f;
+        public float FieldOfView { get; set; } = 60f;
 
-        public static Matrix4 view;
-        public static Matrix4 projection;
+        internal Matrix4 view;
+        internal Matrix4 projection;
 
-        public Vector3 camPosition;
-        public Vector3 camTarget;
-        public Vector3 camDirection;
-        public Vector3 camRight;
-        public Vector3 camUp;
+        public Vector3 Pos { get; set; } = Vector3.Zero;
+        public Vector3 CamTarget { get; } = Vector3.Zero;
+        public Vector3 CamDirection { get; }
+        public Vector3 CamRight { get; set; }
+        public Vector3 CamUp { get; set; }
+        public Vector3 CamFront { get; set; }
 
-        private Vector3 _camFront;
-        private Vector3 _up;
+        public float CamYaw { get; set; }
+        public float CamPitch { get; set; }
 
-        private float _camYaw;
-        private float _camPitch;
-        public float speed = 2f;
-        public readonly float sensitivity = 0.2f;
-        public bool isCursorLocked = true;
-
-        public Frustum frustum = new();
+        internal Frustum frustum = new();
 
         public Camera()
         {
-            _up = Vector3.UnitY;
-            camPosition = new Vector3(0.0f, 0.0f, 3.0f);
-            camTarget = new Vector3(0.0f, 0.0f, 0.0f);
-            camDirection = Vector3.Normalize(camPosition - camTarget);
-            camRight = Vector3.Normalize(Vector3.Cross(_up, camDirection));
-            camUp = Vector3.Cross(camDirection, camRight);
+            CamDirection = Vector3.Normalize(Pos - CamTarget);
+            CamRight = Vector3.Normalize(Vector3.Cross(Vector3.UnitY, CamDirection));
+            CamUp = Vector3.Cross(CamDirection, CamRight);
 
             view = Matrix4.LookAt(
                 new Vector3(0.0f, 0.0f, 3.0f),
@@ -45,19 +36,31 @@ namespace SteelEngine.SteelEngine.Base
                 new Vector3(0.0f, 1.0f, 0.0f)
             );
 
-            _camFront = new Vector3(0.0f, 0.0f, -1.0f);
+            CamFront = new Vector3(0.0f, 0.0f, -1.0f);
+
+            frustum.CamView = view;
+            frustum.CamProj = projection;
         }
 
         public override void Update(FrameEventArgs e)
         {
             base.Update(e);
 
-            ProcessInput(WindowReference!.KeyboardState!, WindowReference.MouseState!, (float)DeltaTime);
+            float aspectRatio = windowWidth / (float)windowHeight;
+            float camPitchRad = CamPitch * MathHelper.DegToRad;
+            float camYawRad = CamYaw * MathHelper.DegToRad;
 
-            float aspectRatio = WindowWidth / (float)WindowHeight;
+            CamFront = new Vector3(
+                MathF.Cos(camPitchRad) * MathF.Cos(camYawRad),
+                MathF.Sin(camPitchRad),
+                MathF.Cos(camPitchRad) * MathF.Sin(camYawRad)
+            ).Normalized();
+            
+            projection = Matrix4.CreatePerspectiveFieldOfView(FieldOfView * MathHelper.DegToRad, aspectRatio, NearPlaneDist, FarPlaneDist);
+            view = Matrix4.LookAt(Pos, Pos + CamFront, Vector3.UnitY);
 
-            projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(fieldOfView), aspectRatio, nearPlaneDist, farPlaneDist);
-            view = Matrix4.LookAt(camPosition, camPosition + _camFront, _up);
+            frustum.CamView = view;
+            frustum.CamProj = projection;
         }
 
         public bool IsSphereVisible(Vector3 center, float radius)
@@ -67,57 +70,6 @@ namespace SteelEngine.SteelEngine.Base
                 if (frustum.planes[i].DistanceToPoint(center) < -radius) return false;
             }
             return true;
-        }
-
-        private void HandleKeyboard(KeyboardState input, float deltaTime)
-        {
-            float acceleration = speed * deltaTime;
-            if (input.IsKeyDown(Keys.LeftControl)) acceleration *= 2f;
-
-            if (input.IsKeyDown(Keys.W)) camPosition += _camFront * acceleration;    // Forward
-
-            if (input.IsKeyDown(Keys.S)) camPosition -= _camFront * acceleration;    // Backward
-
-            if (input.IsKeyDown(Keys.A)) camPosition -= Vector3.Normalize(Vector3.Cross(_camFront, _up)) * acceleration;    // Left
-
-            if (input.IsKeyDown(Keys.D)) camPosition += Vector3.Normalize(Vector3.Cross(_camFront, _up)) * acceleration;    // Right
-
-            if (input.IsKeyDown(Keys.Space)) camPosition += _up * acceleration;    // Up
-
-            if (input.IsKeyDown(Keys.LeftShift)) camPosition -= _up * acceleration;    // Down
-        }
-
-        private void HandleMouse(MouseState mouse)
-        {
-            float deltaX = mouse.Delta.X;
-            float deltaY = mouse.Delta.Y;
-
-            _camYaw += deltaX * sensitivity;
-            _camPitch -= deltaY * sensitivity;
-
-            _camPitch = Math.Clamp(_camPitch, -89.9f, 89.9f);
-
-            _camFront.X = (float)Math.Cos(MathHelper.DegreesToRadians(_camPitch)) * (float)Math.Cos(MathHelper.DegreesToRadians(_camYaw));
-            _camFront.Y = (float)Math.Sin(MathHelper.DegreesToRadians(_camPitch));
-            _camFront.Z = (float)Math.Cos(MathHelper.DegreesToRadians(_camPitch)) * (float)Math.Sin(MathHelper.DegreesToRadians(_camYaw));
-
-            _camFront.Normalize();
-        }
-
-        public void ProcessInput(KeyboardState input, MouseState mouse, float deltaTime)
-        {
-            if (input.IsKeyPressed(Keys.Escape))
-            {
-                isCursorLocked = !isCursorLocked;
-                WindowReference!.CursorState = CursorState.Normal;
-            }
-
-            if (isCursorLocked)
-            {
-                WindowReference!.CursorState = CursorState.Grabbed;
-                HandleKeyboard(input, deltaTime);
-                HandleMouse(mouse);
-            }
         }
     }
 }
