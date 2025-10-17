@@ -2,17 +2,20 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using SteelEngine.Base.Structs;
 
-namespace SteelEngine.SteelEngine.Base
+namespace SteelEngine.Base
 {
-    public class Frustum : EngineScript
+    internal class Frustum : EngineScript
     {
+        internal Matrix4 CamProj { get; set; }
+        internal Matrix4 CamView { get; set; }
+
         public Plane[] planes = new Plane[6];
 
         public override void Update(FrameEventArgs e)
         {
             base.Update(e);
             
-            Matrix4 _viewProjection = Camera.view * Camera.projection;
+            Matrix4 _viewProjection = CamView * CamProj;
 
             // left plane
             planes[0] = new Plane(new Vector4(
