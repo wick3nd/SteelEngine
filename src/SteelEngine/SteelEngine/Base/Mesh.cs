@@ -1,11 +1,11 @@
-using System.Runtime.InteropServices;
-using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using SteelEngine.Utils;
+using System.Runtime.InteropServices;
 
 namespace SteelEngine.Base
 {
-    public class Mesh : IDisposable
+    public class Mesh : EngineScript, IDisposable
     {
         private readonly int _vertexBufferObject;
         private readonly int _vertexArrayObject;
@@ -16,13 +16,16 @@ namespace SteelEngine.Base
         private readonly uint[] _indices;
         private readonly float[] _vertices;
 
+        private bool drawn;
+
         internal enum VAOAttribPointer
         {
             aPosition,
             aTexCoord
         }
 
-        public Mesh(string path)
+
+        public Mesh(string path, bool instanced = false)
         {
             _path = path;
 
@@ -31,7 +34,7 @@ namespace SteelEngine.Base
             _vertexBufferObject = GL.GenBuffer();
             _vertexArrayObject = GL.GenVertexArray();
             _elementBufferObject = GL.GenBuffer();
-            _instanceVertexBufferObject = GL.GenBuffer();
+            if (instanced) _instanceVertexBufferObject = GL.GenBuffer();
 
             if (_vertexArrayObject == 0)
             {
@@ -48,7 +51,7 @@ namespace SteelEngine.Base
                 SEDebug.Log(SEDebugState.Error, $"Failed to create EBO of mesh at path {path}.");
                 throw new Exception($"Failed to create EBO of mesh at path {path}.");
             }
-            if (_instanceVertexBufferObject == 0)
+            if (instanced && _instanceVertexBufferObject == 0)
             {
                 SEDebug.Log(SEDebugState.Error, $"Failed to create instance EBO of mesh at path {path}.");
                 throw new Exception($"Failed to create instance EBO of mesh at path {path}.");
@@ -57,7 +60,7 @@ namespace SteelEngine.Base
             GL.BindVertexArray(_vertexArrayObject);    // Binds the VAO
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);    // Binds the VBO
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);    // Binds the EBO
-            // GL.BindBuffer(BufferTarget.ArrayBuffer, _instanceVertexBufferObject);
+                                                                                     // GL.BindBuffer(BufferTarget.ArrayBuffer, _instanceVertexBufferObject);
 
             GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);    // Adds data to VAO
             GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);    // Adds data to EBO
@@ -70,34 +73,35 @@ namespace SteelEngine.Base
 
             _vertices = [];
 
-            SEDebug.Log(SEDebugState.Info, $"Created a mesh {path}.");
+            SEDebug.Log(SEDebugState.Info, $"Created a new mesh {_vertexArrayObject} {_vertexBufferObject} {_elementBufferObject} {_instanceVertexBufferObject}.");
         }
 
-        public Mesh(float[] vertices, uint[] indices)
+
+        public Mesh(float[] vertices, uint[] indices, bool instanced = false)
         {
             _vertexBufferObject = GL.GenBuffer();
             _vertexArrayObject = GL.GenVertexArray();
             _elementBufferObject = GL.GenBuffer();
-            _instanceVertexBufferObject = GL.GenBuffer();
+            if (instanced) _instanceVertexBufferObject = GL.GenBuffer();
 
             if (_vertexArrayObject == 0)
             {
-                SEDebug.Log(SEDebugState.Error, $"Failed to create VAO of mesh at path .");
+                SEDebug.Log(SEDebugState.Error, $"Failed to create VAO of a mesh at path .");
                 throw new Exception($"Failed to create VAO of mesh at path .");
             }
             if (_vertexBufferObject == 0)
             {
-                SEDebug.Log(SEDebugState.Error, $"Failed to create VBO of mesh at path.");
+                SEDebug.Log(SEDebugState.Error, $"Failed to create VBO of a mesh at path.");
                 throw new Exception($"Failed to create VBO of mesh at path .");
             }
             if (_elementBufferObject == 0)
             {
-                SEDebug.Log(SEDebugState.Error, $"Failed to create EBO of mesh at path.");
+                SEDebug.Log(SEDebugState.Error, $"Failed to create EBO of a mesh at path.");
                 throw new Exception($"Failed to create EBO of mesh at path .");
             }
-            if (_instanceVertexBufferObject == 0)
+            if (instanced && _instanceVertexBufferObject == 0)
             {
-                SEDebug.Log(SEDebugState.Error, $"Failed to create instance EBO of mesh at path .");
+                SEDebug.Log(SEDebugState.Error, $"Failed to create a instance EBO of mesh at path .");
                 throw new Exception($"Failed to create instance EBO of mesh at path .");
             }
 
@@ -120,14 +124,19 @@ namespace SteelEngine.Base
 
             _vertices = [];
 
-            SEDebug.Log(SEDebugState.Info, $"Created a mesh.");
+            SEDebug.Log(SEDebugState.Info, $"Created a new mesh {_vertexArrayObject} {_vertexBufferObject} {_elementBufferObject} {_instanceVertexBufferObject}.");
         }
+
 
         public void Draw(PrimitiveType type = PrimitiveType.Triangles)
         {
             GL.BindVertexArray(_vertexArrayObject);
             GL.DrawElementsInstanced(type, _indices.Length, DrawElementsType.UnsignedInt, IntPtr.Zero, 1);
+
+            if (!drawn) SEDebug.Log(SEDebugState.Debug, $"Drawn a Mesh {_vertexArrayObject} {_vertexBufferObject} {_elementBufferObject} {_instanceVertexBufferObject}");
+            drawn = true;
         }
+
 
         public void DrawInstanced(Matrix4[] instanceData, PrimitiveType type = PrimitiveType.Triangles)
         {
@@ -146,7 +155,14 @@ namespace SteelEngine.Base
             }
 
             GL.DrawElementsInstanced(type, _indices.Length, DrawElementsType.UnsignedInt, IntPtr.Zero, instanceData.Length);
+
+            if (!drawn) SEDebug.Log(SEDebugState.Debug, $"Drawn an instanced Mesh {_vertexArrayObject} {_vertexBufferObject} {_elementBufferObject} {_instanceVertexBufferObject}");
+            drawn = true;
         }
+
+
+        public override void OnExit() => Dispose();
+
 
         private bool disposedValue = false;
 
@@ -154,7 +170,7 @@ namespace SteelEngine.Base
         {
             if (!disposedValue)
             {
-                SEDebug.Log(SEDebugState.Info, $"Disposing mesh {_path}");
+                SEDebug.Log(SEDebugState.Info, $"Disposing Mesh {_vertexArrayObject} {_vertexBufferObject} {_elementBufferObject} {_instanceVertexBufferObject}");
                 GL.DeleteBuffer(_instanceVertexBufferObject);
                 GL.DeleteBuffer(_vertexBufferObject);
                 GL.DeleteVertexArray(_vertexArrayObject);
@@ -164,6 +180,7 @@ namespace SteelEngine.Base
             }
         }
 
+
         ~Mesh()
         {
             if (disposedValue == false)
@@ -172,8 +189,10 @@ namespace SteelEngine.Base
             }
         }
 
+
         public void Dispose()
         {
+            drawn = false;
             Dispose(true);
             GC.SuppressFinalize(this);
         }
