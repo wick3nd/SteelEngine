@@ -1,10 +1,10 @@
-using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using SteelEngine.Utils;
 
 namespace SteelEngine.Base
 {
-    public class Shader : IDisposable
+    public class Shader : EngineScript, IDisposable
     {
         private readonly int _Handle;
         private readonly int _VertexShader;
@@ -90,6 +90,25 @@ namespace SteelEngine.Base
             }
             """;
 
+        public const string skyboxVert = """
+            #version 330 core
+            layout (location = 0) in vec3 aPosition;
+            layout (location = 1) in vec2 aTexCoord;
+            
+            out vec2 TexCoord;
+            
+            uniform mat4 projection = mat4(1.0f);
+            uniform mat4 model = mat4(1.0f);
+            uniform mat4 view;
+            
+            void main()
+            {
+                gl_Position =  projection * view * model * vec4(aPosition, 1.0f);
+                gl_Position.z = gl_Position.w;
+                TexCoord = aTexCoord;
+            }
+            """;
+
         //===================================================================
 
         public Shader(string fragmentSource = defaultFrag, string vertexSource = defaultVert)
@@ -137,12 +156,15 @@ namespace SteelEngine.Base
             GL.DetachShader(_Handle, _FragmentShader);
             GL.DeleteShader(_FragmentShader);
             GL.DeleteShader(_VertexShader);
+
+            GL.UseProgram(0);
         }
 
-        public void Use()
-        {
-            GL.UseProgram(_Handle);
-        }
+
+        public void Enable() => GL.UseProgram(_Handle);
+        public void Disable() => GL.UseProgram(0);
+        public void Delete() => Dispose();
+
 
         private static readonly Dictionary<string, int> _attribCache = [];
         public int GetAttribLoc(string attribute)       // Get the location of the shader attribute
@@ -171,6 +193,10 @@ namespace SteelEngine.Base
         public void SetMatrix3(string name, Matrix3 matrix) => GL.UniformMatrix3(GL.GetUniformLocation(_Handle, name), false, ref matrix);
         public void SetMatrix4(string name, Matrix4 matrix) => GL.UniformMatrix4(GL.GetUniformLocation(_Handle, name), false, ref matrix);
 
+
+        public override void OnExit() => Dispose();
+
+
         private bool disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
@@ -184,6 +210,7 @@ namespace SteelEngine.Base
             }
         }
 
+
         ~Shader()
         {
             if (disposedValue == false)
@@ -191,6 +218,7 @@ namespace SteelEngine.Base
                 SEDebug.Log(SEDebugState.Warning, "GPU Resource leak, did you forget to call Dispose()?");
             }
         }
+
 
         public void Dispose()
         {
