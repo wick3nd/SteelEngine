@@ -1,23 +1,34 @@
-﻿using OpenTK.Mathematics;
-using SteelEngine;
+using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 using SteelEngine.Base;
+using SteelMotion.SteelEngine.Base;
 
-namespace SteelMotion.SteelEngine.Elements
+namespace SteelEngine.Elements
 {
-    internal class SEObject : EngineScript
+    internal class SEObject
     {
         public Mesh? Mesh { get; set; }
         public Material? Material { get; set; }
 
-        public void DrawInstanced(Matrix4[] instanceMatrix)
+        public void Draw(Camera camera, Matrix4 transform, PrimitiveType type = PrimitiveType.Triangles)
         {
             Material!.Use();
-            Mesh!.DrawInstanced(instanceMatrix);
+
+            Material?.Shader?.SetMatrix4("model", transform);
+            Material?.Shader?.SetMatrix4("view", camera.view);
+            Material?.Shader?.SetMatrix4("projection", camera.projection);
+
+            Mesh!.Draw(type);
         }
 
-        public override void OnExit()
+        public void DrawInstanced(Camera camera, Matrix4[] instanceMatrix, PrimitiveType type = PrimitiveType.Triangles)
         {
-            Mesh?.Dispose();
+            Material!.Use();
+
+            Material?.Shader?.SetMatrix4("view", camera.view);
+            Material?.Shader?.SetMatrix4("projection", camera.projection);
+
+            Mesh!.DrawInstanced(instanceMatrix, type);
         }
     }
 }
