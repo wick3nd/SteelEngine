@@ -1,10 +1,10 @@
-﻿using System.Text;
+using System.Text;
 
 namespace SteelEngine.Base
 {
     class ModelImporter
     {
-        public ModelImporter(string path, int offset, out float[] vertices, out uint[] indices)
+        public ModelImporter(string path, out float[] vertices, out uint[] indices)
         {
             float[] vertData;
             uint[] indiceData;
@@ -12,7 +12,6 @@ namespace SteelEngine.Base
             using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
             using (BinaryReader br = new(fs, Encoding.UTF8, false))
             {
-                fs.Seek(offset, SeekOrigin.Current);
                 ulong floatCount = br.ReadUInt64();
                 ulong indiceCount = br.ReadUInt64();
 
