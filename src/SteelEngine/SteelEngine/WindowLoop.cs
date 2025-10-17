@@ -1,8 +1,8 @@
-using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using SteelEngine.SteelEngine.Base;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using SteelEngine.Utils;
 
 namespace SteelEngine
@@ -14,11 +14,13 @@ namespace SteelEngine
 
         public NativeWindow? PublicWindowReference;
 
-        public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), MinimumClientSize = (256, 144), Title = title, Vsync = VSyncMode.Off, Flags = ContextFlags.Default/*, WindowBorder = WindowBorder.Fixed*/})
+        public WindowLoop(NativeWindowSettings NW) : base(GameWindowSettings.Default, NW)
         {
+            GL.LoadBindings(new GLFWBindingsContext());    // Load the OpenGL bindings separately for trim compatibility
+
             if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
 
-            CenterWindow(new Vector2i(width, height));
+            CenterWindow(new Vector2i(ClientSize.X, ClientSize.Y));
 
             SEDebug.Log(SEDebugState.Log, "Created new window");
 
@@ -28,17 +30,18 @@ namespace SteelEngine
         {
             base.OnLoad();
 
-            GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);
 
-            // GL.DepthFunc(DepthFunction.Notequal);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+           // GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
+           // GL.BlendFunc(0, BlendingFactorSrc.One, BlendingFactorDest.One);
+           // GL.BlendFunc(1, BlendingFactorSrc.Zero, BlendingFactorDest.OneMinusSrcAlpha);
             GL.BlendEquation(BlendEquationMode.FuncAdd);
 
-            BehaviourManager.InitializeES();
             BehaviourManager.StartCall();
             BehaviourManager.ExposeWindow(PublicWindowReference!);
         }
@@ -66,13 +69,23 @@ namespace SteelEngine
             if (fixedUpdateTimer >= fixedTimeStep)
             {
                 BehaviourManager.FixedUpdateCall(e);
-                fixedUpdateTimer = 0f;
+                fixedUpdateTimer -= fixedTimeStep;
+               // fixedUpdateTimer = 0;
             }
 
             BehaviourManager.UpdateCall(e);
             BehaviourManager.LateUpdateCall(e);
 
             Context.SwapBuffers();
+
+            BehaviourManager.AfterBufferSwap(e);
+        }
+
+        protected override void OnUpdateFrame(FrameEventArgs args)
+        {
+            base.OnUpdateFrame(args);
+
+            BehaviourManager.FrameUpdateCall(args);
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -80,8 +93,7 @@ namespace SteelEngine
             base.OnResize(e);
             SEDebug.Log(SEDebugState.Info, $"Window resized -- {e.Width}x{e.Height}");
 
-            BehaviourManager.ExposeWidth(e.Width);
-            BehaviourManager.ExposeHeight(e.Height);
+            BehaviourManager.ExposeResolution(e.Width, e.Height);
             BehaviourManager.ResizeCall(e);
         }
 
