@@ -1,4 +1,4 @@
-using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL4;
 using StbImageSharp;
 using SteelEngine.Utils;
 
@@ -85,7 +85,10 @@ namespace SteelEngine.Base
         }
 
 
-        public override void OnExit() => Dispose();
+        public override void OnExit()
+        {
+            Dispose();
+        }
 
 
         private bool disposedValue = false;

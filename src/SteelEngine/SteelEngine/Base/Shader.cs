@@ -1,4 +1,4 @@
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using SteelEngine.Utils;
 
@@ -124,6 +124,20 @@ namespace SteelEngine.Base
 
             GL.GetShader(_VertexShader, ShaderParameter.CompileStatus, out int success);
             GL.GetShader(_FragmentShader, ShaderParameter.CompileStatus, out int success2);
+
+            //============================================================
+            //
+            //              ADD
+            //              A
+            //              FALLBACK
+            //              SHADER
+            //              OPTION
+            //              JUST
+            //              IN
+            //              CASE
+            //              (and make it avaible to be changed)
+            //
+            //============================================================
 
             if (success2 == 0)
             {
