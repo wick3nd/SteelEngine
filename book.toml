@@ -1,0 +1,8 @@
+[book]
+authors = ["wick3nd"]
+language = "en"
+src = "src"
+title = "SteelEngine Docs"
+
+[output.html]
+git-repository-url = "https://github.com/wick3nd/SteelEngine"
