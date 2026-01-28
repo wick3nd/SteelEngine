@@ -1,8 +1,8 @@
 using OpenTK.Mathematics;
 
-namespace SteelEngine.EngineBase.Structs
+namespace SteelEngine.Base.Structs
 {
-    internal readonly struct Plane(Vector4 vec)
+    public readonly struct Plane(Vector4 vec)
     {
         private readonly Vector4 _vec = vec;
 
@@ -12,6 +12,6 @@ namespace SteelEngine.EngineBase.Structs
             return new Plane(_vec / len);
         }
 
-        internal readonly float DistanceToPoint(Vector3 point) => Vector3.Dot(new Vector3(_vec.X, _vec.Y, _vec.Z), point) + _vec.W;
+        public readonly float DistanceToPoint(Vector3 point) => Vector3.Dot(new Vector3(_vec.X, _vec.Y, _vec.Z), point) + _vec.W;
     }
 }

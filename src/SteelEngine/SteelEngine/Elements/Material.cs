@@ -1,30 +1,44 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL4;
+using SteelEngine;
+using SteelEngine.Base;
+using SteelEngine.SteelEngine.Base;
 
-namespace SteelEngine.Base
+namespace SteelMotion.SteelEngine.Elements
 {
-    internal class Material
+    internal class Material : EngineScript
     {
         public Shader? Shader { get; set; }
-        public Texture2D? Texture1 { get; set; }
-        public Texture2D? Texture2 { get; set; }
+        public Texture2D? Tex1 { get; set; }
+        public Texture2D? Tex2 { get; set; }
 
         public void Use()
         {
-            Shader!.Enable();
+            Shader!.Use();
+
+            Shader.SetMatrix4("projection", Camera.projection);
+            Shader.SetMatrix4("view", Camera.view);
 
             int unit = 0;
-            if (Texture1 != null)
+            if (Tex1 != null)
             {
-                Texture1.Bind((TextureUnit)((int)TextureUnit.Texture0 + unit));
+                Tex1.Use(TextureUnit.Texture0 + unit);
                 Shader.SetInt("texture0", unit);
                 unit++;
             }
-            if (Texture2 != null)
+            if (Tex2 != null)
             {
-                Texture2.Bind((TextureUnit)((int)TextureUnit.Texture0 + unit));
+                Tex2.Use(TextureUnit.Texture0 + unit);
                 Shader.SetInt("texture1", unit);
-               // unit++;
+                unit++;
             }
         }
+
+        public override void OnExit()
+        {
+            Shader!.Dispose();
+            Tex1?.Dispose();
+            Tex2?.Dispose();
+        }
     }
+
 }
