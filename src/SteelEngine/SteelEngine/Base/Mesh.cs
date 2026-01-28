@@ -1,181 +1,107 @@
-using System.Runtime.InteropServices;
-using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using SteelEngine.Utils;
+using SteelEngine.Base.Buffers;
+using SteelEngine.EngineBase.Structs;
+using SteelEngine.EngineBase.EngineBehaviour;
+using SteelEngine.Elements;
 
 namespace SteelEngine.Base
 {
-    public class Mesh : IDisposable
+    internal class Mesh : EngineScript, IDisposable
     {
-        private readonly int _vertexBufferObject;
-        private readonly int _vertexArrayObject;
-        private readonly int _elementBufferObject;
-        private readonly int _instanceVertexBufferObject;
+        private readonly VAO _vertexArrayObject;
+        private readonly VBO _vertexBufferObject;
+        private readonly EBO _elementBufferObject;
+        private readonly VBO _instanceVertexBufferObject;
 
-        private readonly string _path;
-        private readonly uint[] _indices;
-        private readonly float[] _vertices;
+        private MeshStr meshStr;
+        private bool drawn;
 
-        internal enum VAOAttribPointer
+        public Mesh(string path, bool instanced = false)
         {
-            aPosition,
-            aTexCoord
-        }
+            ModelImporter _ = new(path, out meshStr);
 
-        public Mesh(string path)
-        {
-            _path = path;
+            _vertexArrayObject = new();
+            _vertexBufferObject = new();
+            _elementBufferObject = new();
+            _instanceVertexBufferObject = instanced ? new() : null!;
 
-            ModelImporter _ = new(path, out _vertices, out _indices);
+            _vertexArrayObject.Enable();
 
-            _vertexBufferObject = GL.GenBuffer();
-            _vertexArrayObject = GL.GenVertexArray();
-            _elementBufferObject = GL.GenBuffer();
-            _instanceVertexBufferObject = GL.GenBuffer();
+            _vertexBufferObject.Enable();
+            _vertexBufferObject.Data(meshStr.vertices);
 
-            if (_vertexArrayObject == 0)
-            {
-                SEDebug.Log(SEDebugState.Error, $"Failed to create VAO of mesh at path {path}.");
-                throw new Exception($"Failed to create VAO of mesh at path {path}.");
-            }
-            if (_vertexBufferObject == 0)
-            {
-                SEDebug.Log(SEDebugState.Error, $"Failed to create VBO of mesh at path {path}.");
-                throw new Exception($"Failed to create VBO of mesh at path {path}.");
-            }
-            if (_elementBufferObject == 0)
-            {
-                SEDebug.Log(SEDebugState.Error, $"Failed to create EBO of mesh at path {path}.");
-                throw new Exception($"Failed to create EBO of mesh at path {path}.");
-            }
-            if (_instanceVertexBufferObject == 0)
-            {
-                SEDebug.Log(SEDebugState.Error, $"Failed to create instance EBO of mesh at path {path}.");
-                throw new Exception($"Failed to create instance EBO of mesh at path {path}.");
-            }
+            _elementBufferObject.Enable();
+            _elementBufferObject.Data(meshStr.indices);
 
-            GL.BindVertexArray(_vertexArrayObject);    // Binds the VAO
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);    // Binds the VBO
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);    // Binds the EBO
-            // GL.BindBuffer(BufferTarget.ArrayBuffer, _instanceVertexBufferObject);
+            _vertexArrayObject.Set();
+            _vertexArrayObject.Disable();
 
-            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);    // Adds data to VAO
-            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);    // Adds data to EBO
-
-            GL.VertexAttribPointer((int)VAOAttribPointer.aPosition, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
-            GL.VertexAttribPointer((int)VAOAttribPointer.aTexCoord, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
-
-            GL.EnableVertexAttribArray((int)VAOAttribPointer.aPosition);
-            GL.EnableVertexAttribArray((int)VAOAttribPointer.aTexCoord);
-
-            _vertices = [];
-
-            SEDebug.Log(SEDebugState.Info, $"Created a mesh {path}.");
-        }
-
-        public Mesh(float[] vertices, uint[] indices)
-        {
-            _vertexBufferObject = GL.GenBuffer();
-            _vertexArrayObject = GL.GenVertexArray();
-            _elementBufferObject = GL.GenBuffer();
-            _instanceVertexBufferObject = GL.GenBuffer();
-
-            if (_vertexArrayObject == 0)
-            {
-                SEDebug.Log(SEDebugState.Error, $"Failed to create VAO of mesh at path .");
-                throw new Exception($"Failed to create VAO of mesh at path .");
-            }
-            if (_vertexBufferObject == 0)
-            {
-                SEDebug.Log(SEDebugState.Error, $"Failed to create VBO of mesh at path.");
-                throw new Exception($"Failed to create VBO of mesh at path .");
-            }
-            if (_elementBufferObject == 0)
-            {
-                SEDebug.Log(SEDebugState.Error, $"Failed to create EBO of mesh at path.");
-                throw new Exception($"Failed to create EBO of mesh at path .");
-            }
-            if (_instanceVertexBufferObject == 0)
-            {
-                SEDebug.Log(SEDebugState.Error, $"Failed to create instance EBO of mesh at path .");
-                throw new Exception($"Failed to create instance EBO of mesh at path .");
-            }
-
-            _path = "";
-            _indices = indices;
-
-            GL.BindVertexArray(_vertexArrayObject);    // Binds the VAO
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);    // Binds the VBO
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);    // Binds the EBO
-            // GL.BindBuffer(BufferTarget.ArrayBuffer, _instanceVertexBufferObject);
-
-            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);    // Adds data to VAO
-            GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);    // Adds data to EBO
-
-            GL.VertexAttribPointer((int)VAOAttribPointer.aPosition, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
-            GL.VertexAttribPointer((int)VAOAttribPointer.aTexCoord, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
-
-            GL.EnableVertexAttribArray((int)VAOAttribPointer.aPosition);
-            GL.EnableVertexAttribArray((int)VAOAttribPointer.aTexCoord);
-
-            _vertices = [];
-
-            SEDebug.Log(SEDebugState.Info, $"Created a mesh.");
+            SEDebug.Log(SEDebugState.Info, $"Created a new mesh {_vertexArrayObject} {_vertexBufferObject} {_elementBufferObject} {_instanceVertexBufferObject}");
         }
 
         public void Draw(PrimitiveType type = PrimitiveType.Triangles)
         {
-            GL.BindVertexArray(_vertexArrayObject);
-            GL.DrawElementsInstanced(type, _indices.Length, DrawElementsType.UnsignedInt, IntPtr.Zero, 1);
+            _vertexArrayObject.Enable();
+            GL.DrawArrays(type, 0, meshStr.indices.Length);
+
+            if (drawn) return;
+
+            SEDebug.Log(SEDebugState.Debug, $"Drawn a Mesh {_vertexArrayObject} {_vertexBufferObject} {_elementBufferObject} {_instanceVertexBufferObject}");
+            drawn = true;
         }
 
         public void DrawInstanced(Matrix4[] instanceData, PrimitiveType type = PrimitiveType.Triangles)
         {
-            GL.BindVertexArray(_vertexArrayObject);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _instanceVertexBufferObject);
+            _vertexArrayObject.Enable();
+            _instanceVertexBufferObject.Enable();
 
-            int size = instanceData.Length * Marshal.SizeOf<Matrix4>();
-            GL.BufferData(BufferTarget.ArrayBuffer, size, instanceData, BufferUsageHint.StaticDraw);
+            int size = instanceData.Length * 64;  // * size of Matrix4 (float)
+            GL.BufferData(BufferTarget.ArrayBuffer, size, instanceData.AsSpan(), BufferUsage.StaticDraw);
 
-            for (int i = 0; i < 4; i++)
+            for (uint i = 0; i < 4; i++)
             {
-                int loc = 2 + i;
+                uint loc = 2 + i;
                 GL.EnableVertexAttribArray(loc);
-                GL.VertexAttribPointer(loc, 4, VertexAttribPointerType.Float, false, 64, (IntPtr)(i * 16));
-                GL.VertexAttribDivisor(loc, 1);
-            }
+                GL.VertexAttribPointer(loc, 4, VertexAttribPointerType.Float, false, 64, (nint)(i * 16));
 
-            GL.DrawElementsInstanced(type, _indices.Length, DrawElementsType.UnsignedInt, IntPtr.Zero, instanceData.Length);
+                if (GLControl.GLVerGEqual(3, 3))
+                {
+                    GL.VertexAttribDivisor(loc, 1);
+                    continue;
+                }
+
+                if (GLControl.SupportsExt(GLExtension.ARB_instanced_arrays))
+                {
+                    GL.ARB.VertexAttribDivisorARB(loc, 1);
+                    continue;
+                }
+
+                else throw new NotSupportedException("Your GPU does not support the opengl 3.3 driver");
+            }
+            GL.DrawElementsInstanced(type, meshStr.indices.Length, DrawElementsType.UnsignedInt, 0, instanceData.Length);
+            // GL.MultiDrawElementsIndirect()  // 4.3
+
+            if (drawn) return;
+            
+            SEDebug.Log(SEDebugState.Debug, $"Drawn an instanced Mesh {_vertexArrayObject} {_vertexBufferObject} {_elementBufferObject} {_instanceVertexBufferObject}");
+            drawn = true;
         }
 
-        private bool disposedValue = false;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                SEDebug.Log(SEDebugState.Info, $"Disposing mesh {_path}");
-                GL.DeleteBuffer(_instanceVertexBufferObject);
-                GL.DeleteBuffer(_vertexBufferObject);
-                GL.DeleteVertexArray(_vertexArrayObject);
-                GL.DeleteBuffer(_elementBufferObject);
-
-                disposedValue = true;
-            }
-        }
-
-        ~Mesh()
-        {
-            if (disposedValue == false)
-            {
-                SEDebug.Log(SEDebugState.Warning, "GPU Resource leak, did you forget to call Dispose()?");
-            }
-        }
-
+        public void Destroy() => Dispose();
+        public override void OnExit() => Dispose();
+        
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            SEDebug.Log(SEDebugState.Info, $"Disposing Mesh {_vertexArrayObject} {_vertexBufferObject} {_elementBufferObject} {_instanceVertexBufferObject}");
+
+            _instanceVertexBufferObject?.Destroy();
+            _vertexBufferObject?.Destroy();
+            _vertexArrayObject?.Destroy();
+            _elementBufferObject?.Destroy();
+
+            drawn = false;
         }
     }
 }

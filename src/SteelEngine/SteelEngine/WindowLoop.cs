@@ -1,97 +1,169 @@
-using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using SteelEngine.SteelEngine.Base;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using SteelEngine.Utils;
+using SteelEngine.EngineBase.EngineBehaviour;
 
 namespace SteelEngine
 {
     public class WindowLoop : GameWindow
     {
-        private static double fixedUpdateTimer;
-        public double fixedTimeStep = .02;
+#pragma warning disable CA2211, CS0108
 
-        public NativeWindow? PublicWindowReference;
+        public static string Title = "SteelEngine window";
+        public static Vector2i WindowSize = (640, 360);
+        public static Vector2i MinWindowSize = (256, 144);
 
-        public WindowLoop(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), MinimumClientSize = (256, 144), Title = title, Vsync = VSyncMode.Off, Flags = ContextFlags.Default/*, WindowBorder = WindowBorder.Fixed*/})
+        public double fixedTimeStep = .016;
+        static double _fixedUpdateTimer;
+
+#pragma warning restore CA2211, CS0108
+
+        public WindowLoop() : base(GameWindowSettings.Default, new NativeWindowSettings() { Title = Title, ClientSize = WindowSize, MinimumClientSize = MinWindowSize, Profile = ContextProfile.Compatability })
         {
-            if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
+            try
+            {
+                CenterWindow(new Vector2i(ClientSize.X, ClientSize.Y));
 
-            CenterWindow(new Vector2i(width, height));
+                if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
+                OpenTK.Graphics.GLLoader.LoadBindings(new GLFWBindingsContext());    // Load the OpenGL bindings separately for trim compatibility
 
-            SEDebug.Log(SEDebugState.Log, "Created new window");
-
-            PublicWindowReference = this;
+                SEDebug.Log(SEDebugState.Info, $"{GL.GetString(StringName.Version)} {GL.GetString(StringName.Renderer)} GL{GL.GetInteger(GetPName.MajorVersion)}.{GL.GetInteger(GetPName.MinorVersion)}");
+                SEDebug.Log(SEDebugState.Log, "Created new window");
+                
+                GLControl.GetExtensions();
+            }
+            catch (Exception ex)
+            {
+                Crash(ex);
+            }
         }
         protected override void OnLoad()
         {
             base.OnLoad();
 
-            GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            try
+            {
+                GL.Enable(EnableCap.DepthTest);
+                GL.Enable(EnableCap.CullFace);
+                GL.Enable(EnableCap.Blend);
 
-            GL.Enable(EnableCap.DepthTest);
-            GL.Enable(EnableCap.CullFace);
-            GL.Enable(EnableCap.Blend);
+               // GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
+               // GL.BlendFunc(0, BlendingFactorSrc.One, BlendingFactorDest.One);
+               // GL.BlendFunc(1, BlendingFactorSrc.Zero, BlendingFactorDest.OneMinusSrcAlpha);
+                GL.BlendEquation(BlendEquationMode.FuncAdd);
 
-            // GL.DepthFunc(DepthFunction.Notequal);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.BlendEquation(BlendEquationMode.FuncAdd);
-
-            BehaviourManager.InitializeES();
-            BehaviourManager.StartCall();
-            BehaviourManager.ExposeWindow(PublicWindowReference!);
+                BehaviourManager.ExposeWindow(this);
+                BehaviourManager.ExposeResolution(ClientSize.X, ClientSize.Y);
+                BehaviourManager.StartCall();
+            }
+            catch (Exception ex)
+            {
+                Crash(ex);
+            }
         }
 
         protected override void OnUnload()
         {
             base.OnUnload();
 
-            BehaviourManager.ExitCall();
+            try
+            {
+                BehaviourManager.ExitCall();
 
-            SEDebug.Log(SEDebugState.Info, "Closing the window");
+                SEDebug.Log(SEDebugState.Info, "Closing the window");
+            }
+            catch (Exception ex)
+            {
+                Crash(ex);
+            }
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);
 
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            BehaviourManager.ExposeWindow(PublicWindowReference!);
-            BehaviourManager.ExposeTime(e.Time);
-
-            fixedUpdateTimer += e.Time;
-
-            if (fixedUpdateTimer >= fixedTimeStep)
+            try
             {
-                BehaviourManager.FixedUpdateCall(e);
-                fixedUpdateTimer = 0f;
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+                BehaviourManager.ExposeWindow(this);
+                BehaviourManager.ExposeTime(e.Time);
+
+                _fixedUpdateTimer += e.Time;
+
+                if (_fixedUpdateTimer >= fixedTimeStep)
+                {
+                    BehaviourManager.FixedUpdateCall(e);
+                    _fixedUpdateTimer -= fixedTimeStep;
+                    // fixedUpdateTimer = 0;
+                }
+
+                BehaviourManager.UpdateCall(e);
+                BehaviourManager.LateUpdateCall(e);
+
+                Context.SwapBuffers();
             }
+            catch (Exception ex)
+            {
+                Crash(ex);
+            }
+        }
 
-            BehaviourManager.UpdateCall(e);
-            BehaviourManager.LateUpdateCall(e);
+        protected override void OnUpdateFrame(FrameEventArgs args)
+        {
+            base.OnUpdateFrame(args);
 
-            Context.SwapBuffers();
+            try
+            {
+                BehaviourManager.FrameUpdateCall(args);
+            }
+            catch (Exception ex)
+            {
+                Crash(ex);
+            }
         }
 
         protected override void OnResize(ResizeEventArgs e)
         {
             base.OnResize(e);
-            SEDebug.Log(SEDebugState.Info, $"Window resized -- {e.Width}x{e.Height}");
 
-            BehaviourManager.ExposeWidth(e.Width);
-            BehaviourManager.ExposeHeight(e.Height);
-            BehaviourManager.ResizeCall(e);
+            try
+            {
+                SEDebug.Log(SEDebugState.Info, $"Window resized -- {e.Width}x{e.Height}");
+
+                BehaviourManager.ExposeResolution(e.Width, e.Height);
+                BehaviourManager.ResizeCall(e);
+            }
+            catch (Exception ex)
+            {
+                Crash(ex);
+            }
         }
 
         protected override void OnFramebufferResize(FramebufferResizeEventArgs e)
         {
             base.OnFramebufferResize(e);
 
-            GL.Viewport(0, 0, e.Width, e.Height);
+            try
+            {
+                GL.Viewport(0, 0, e.Width, e.Height);
 
-            BehaviourManager.FrameBufferResizeCall(e);
+                BehaviourManager.FrameBufferResizeCall(e);
+            }
+            catch (Exception ex)
+            {
+                Crash(ex);
+            }
+        }
+
+        private void Crash(Exception ex)
+        {
+            SEDebug.Log(SEDebugState.Error, $"Exception: {ex.Message}\n{ex.StackTrace}");
+            Close();
         }
     }
 }
