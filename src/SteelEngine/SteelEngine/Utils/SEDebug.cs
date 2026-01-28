@@ -2,7 +2,6 @@
 {
     public enum SEDebugState
     {
-        Debug,
         Log,
         Info,
         Warning,
@@ -12,7 +11,6 @@
     class SEDebug
     {   
         private static readonly string _fileName = @$"Logs\log_{DateTime.Now.ToString().Replace(":", "").Replace(".", "-").Replace(" ", "_")}.txt";
-        private static readonly StreamWriter output = new(_fileName, true);
 
         public static async void Log<T>(SEDebugState state, T text)
         {
@@ -32,13 +30,13 @@
 
                 case SEDebugState.Error: Console.ForegroundColor = ConsoleColor.DarkRed;
                     break;
-
-                default: break;
             }
 
-            Console.Out.Write($"{log}\n");
+            Console.Write($"{log}\n");
+
             Console.ForegroundColor = previousColor;
 
+            using StreamWriter output = new(_fileName, append: true);
             await output.WriteLineAsync(log);
         }
     }
