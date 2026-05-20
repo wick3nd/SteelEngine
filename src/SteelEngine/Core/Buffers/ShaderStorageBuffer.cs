@@ -1,4 +1,5 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using SteelEngine.Elements.Interfaces;
 using SteelEngine.Utils;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -6,7 +7,7 @@ using System.Runtime.InteropServices;
 #pragma warning disable CA1816
 namespace SteelEngine.Core.Buffers
 {
-    public class ShaderStorageBuffer : IBufferObject
+    public class ShaderStorageBuffer : IBufferObject, IEngineDisposable
     {
         private int m_ShaderStorageBuffer;
         private static int _currentBound;

@@ -1,31 +1,29 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using SteelEngine.Elements.Interfaces;
 using SteelEngine.Utils;
 using System.Runtime.CompilerServices;
 
 #pragma warning disable CA1816
 namespace SteelEngine.Core.Buffers
 {
-    public class UniformBuffer : IBufferObject
+    public class UniformBuffer : IBufferObject, IEngineDisposable
     {
-        internal static byte[] sharedUBOBuffer = new byte[GLControl.MaxUniformBlockSize];
-        internal byte[] _internalUBOBuffer = [];
-
         private int m_UniformBuffer;
         private static int _currentBound;
         private readonly string? _debugName;
 
         private int _size;
 
-#pragma warning disable CS0649, IDE0044
-        private bool _isFixedSize;
-#pragma warning restore CS0649, IDE0044
+//#pragma warning disable CS0649, IDE0044
+       // private bool _isFixedSize;
+//#pragma warning restore CS0649, IDE0044
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UniformBuffer(string debugName, int size)
         {
-            if (GLControl.GLVerGEqual(4, 5)) GL.CreateBuffers(1, ref m_UniformBuffer);
-            else if (GLControl.SupportsExt(GLExtension.ARB_direct_state_access)) GL.ARB.CreateBuffers(1, ref m_UniformBuffer);
-            else GL.GenBuffers(1, ref m_UniformBuffer);
+            if (GLControl.GLVerGEqual(4, 5)) GL.CreateBuffers(1, ref m_UniformBuffer);  // GL 4.5
+            else if (GLControl.SupportsExt(GLExtension.ARB_direct_state_access)) GL.ARB.CreateBuffers(1, ref m_UniformBuffer);  // GL_ARB_direct_state_access
+            else GL.GenBuffers(1, ref m_UniformBuffer);  // GL 1.5
 
             if (m_UniformBuffer == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create a UBO \"{debugName}\"", true);
 

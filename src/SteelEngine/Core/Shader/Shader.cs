@@ -1,4 +1,5 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using SteelEngine.Core.EngineBehaviour;
 using SteelEngine.Utils;
 using System.Runtime.CompilerServices;
 
@@ -17,8 +18,8 @@ namespace SteelEngine.Core
         //
         // also add shader caching,
         // async compilation(if i can),
-        // separable programs,
-        // pipeline objects,
+        // separable programs,      OGL 4.1
+        // pipeline objects,        OGL 4.1
         // hot reload without relink and loading shaders from a file(add a bool if a shader is from a file/sep)
         //
         //===============================================
@@ -28,132 +29,56 @@ namespace SteelEngine.Core
         private readonly string? _debugName;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Shader(ShaderBuilder[] shaders)
-        {
-            int shadersCount = shaders.Length;
-            for (int i = 0; i < shadersCount; i++)
-            {
-                ref var shader = ref shaders[i];
-                CompileShader(shader.ShaderType, shader.ShaderSource, out shader.shaderHandle);
-               // GL.ProgramParameteri(shader.shaderHandle, ProgramParameterPName.ProgramSeparable, 1);
-            }
-
-            m_Shader = GL.CreateProgram();
-            if (m_Shader == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create the Shader", true);
-
-            for (int i = 0; i < shadersCount; i++) GL.AttachShader(m_Shader, shaders[i].shaderHandle);
-
-            GL.LinkProgram(m_Shader);
-            for (int i = 0; i < shadersCount; i++) DeleteShader(shaders[i].shaderHandle);
-
-#if DEBUG
-            GL.GetProgrami(_Handle, ProgramProperty.LinkStatus, out int shaderLinkStatus);
-            if (shaderLinkStatus == 0)
-            {
-                GL.GetProgramInfoLog(_Handle, out string infoLog);
-                SEDebug.Log(SEDebugState.Error, $"Handle linking error: {infoLog}");
-            }
-#endif
-
-            SEDebug.Log(SEDebugState.Info, $"Created shader handle {m_Shader}");
-            
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Shader(string debugName, ShaderBuilder[] shaders)
         {
+            m_Shader = GL.CreateProgram();
+            if (m_Shader == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create the Shader", true);
+
             int shadersCount = shaders.Length;
             for (int i = 0; i < shadersCount; i++)
             {
                 ref var shader = ref shaders[i];
-                CompileShader(shader.ShaderType, shader.ShaderSource, out shader.shaderHandle);
-               // GL.ProgramParameteri(shader.shaderHandle, ProgramParameterPName.ProgramSeparable, 1);
+                CompileShader(shader.ShaderType, shader.ShaderCode, out shader.shaderHandle);
             }
-
-            m_Shader = GL.CreateProgram();
-            if (m_Shader == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create the Shader", true);
 
             for (int i = 0; i < shadersCount; i++) GL.AttachShader(m_Shader, shaders[i].shaderHandle);
 
             GL.LinkProgram(m_Shader);
             for (int i = 0; i < shadersCount; i++) DeleteShader(shaders[i].shaderHandle);
 
-#if DEBUG
-            GL.GetProgrami(_Handle, ProgramProperty.LinkStatus, out int shaderLinkStatus);
-            if (shaderLinkStatus == 0)
-            {
-                GL.GetProgramInfoLog(_Handle, out string infoLog);
-                SEDebug.Log(SEDebugState.Error, $"Handle linking error: {infoLog}");
-            }
-#endif
+            #if DEBUG
+            CheckLinkStatus();
+            #endif
             
             _debugName = debugName;
             SEDebug.Log(SEDebugState.Info, $"Created shader handle \"{debugName}\"");
-            
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Shader(ShaderBuilder shader)
-        {
-            CompileShader(shader.ShaderType, shader.ShaderSource, out shader.shaderHandle);
-
-            m_Shader = GL.CreateProgram();
-            if (m_Shader == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create the Shader", true);
-
-            GL.AttachShader(m_Shader, shader.shaderHandle);
-            GL.LinkProgram(m_Shader);
-            DeleteShader(shader.shaderHandle);
-
-#if DEBUG
-            GL.GetProgrami(_Handle, ProgramProperty.LinkStatus, out int shaderLinkStatus);
-            if (shaderLinkStatus == 0)
-            {
-                GL.GetProgramInfoLog(_Handle, out string infoLog);
-                SEDebug.Log(SEDebugState.Error, $"Handle linking error: {infoLog}");
-            }
-#endif
-
-            SEDebug.Log(SEDebugState.Info, $"Created shader handle {m_Shader}");
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Shader(string debugName, ShaderBuilder shader)
-        {
-            CompileShader(shader.ShaderType, shader.ShaderSource, out shader.shaderHandle);
-
-            m_Shader = GL.CreateProgram();
-            if (m_Shader == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create the Shader", true);
-
-            GL.AttachShader(m_Shader, shader.shaderHandle);
-            GL.LinkProgram(m_Shader);
-            DeleteShader(shader.shaderHandle);
-
-#if DEBUG
-            GL.GetProgrami(_Handle, ProgramProperty.LinkStatus, out int shaderLinkStatus);
-            if (shaderLinkStatus == 0)
-            {
-                GL.GetProgramInfoLog(_Handle, out string infoLog);
-                SEDebug.Log(SEDebugState.Error, $"Handle linking error: {infoLog}");
-            }
-#endif
-
-            _debugName = debugName;
-            SEDebug.Log(SEDebugState.Info, $"Created shader handle \"{debugName}\"");
-            
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void CompileShader(ShaderType type, string source, out int handle)
         {
-            int shader = handle = GL.CreateShader(type);
-            GL.ShaderSource(shader, source);
-            GL.CompileShader(shader);
+            handle = GL.CreateShader(type);
+            GL.ShaderSource(handle, source);
+            GL.CompileShader(handle);
 
-            GL.GetShaderi(shader, ShaderParameterName.CompileStatus, out int compileStatus);
+            #if DEBUG
+            GL.GetShaderi(handle, ShaderParameterName.CompileStatus, out int compileStatus);
             if (compileStatus == 0)
             {
-                GL.GetShaderInfoLog(shader, out string infoLog);
+                GL.GetShaderInfoLog(handle, out string infoLog);
                 SEDebug.Log(SEDebugState.Error, $"{type.ToString().Replace("Shader", " shader")} error: {infoLog}");
+            }
+            #endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void CheckLinkStatus()
+        {
+            GL.GetProgrami(m_Shader, ProgramProperty.LinkStatus, out int shaderLinkStatus);
+            if (shaderLinkStatus == 0)
+            {
+                GL.GetProgramInfoLog(m_Shader, out string infoLog);
+                SEDebug.Log(SEDebugState.Error, $"Shader linking error: {infoLog}");
             }
         }
 
@@ -163,6 +88,7 @@ namespace SteelEngine.Core
             GL.DetachShader(m_Shader, shaderHandle);
             GL.DeleteShader(shaderHandle);
         }
+
 
         public override string ToString() => _debugName ?? $"{m_Shader}";
         public int GetHandle() => m_Shader;

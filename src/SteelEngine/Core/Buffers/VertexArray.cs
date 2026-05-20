@@ -1,45 +1,77 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using SteelEngine.Core.EngineBehaviour;
+using SteelEngine.Elements.Interfaces;
 using SteelEngine.Utils;
 using System.Runtime.CompilerServices;
 
-#pragma warning disable CA1816, IDE0079, CA1822
 namespace SteelEngine.Core.Buffers
 {
-    public class VertexArray : IBufferObject
+    public class VertexArray : IBufferObject, IEngineDisposable
     {
-        private int m_VertexArray;
-        private static int _currentBound;
-        private readonly string? _debugName;
+        internal bool generated = false;
+
+        int m_VertexArray;
+        static int _currentBound;
+
+        public MeshPrimitives PrimitiveFlags { get; internal set; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public VertexArray()
         {
-            GL.GenVertexArrays(1, ref m_VertexArray);
+            GL.GenVertexArrays(1, ref m_VertexArray);  // GL 3.0
             if (m_VertexArray == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create a VAO", true);
-            SEDebug.Log(SEDebugState.Debug, $"Created a new VAO {m_VertexArray}");
+
+            SEDebug.Log(SEDebugState.Debug, $"Created a new VAO[{m_VertexArray}]");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public VertexArray(string debugName)
+        public void Set(MeshPrimitives flags)
         {
-            GL.GenVertexArrays(1, ref m_VertexArray);
-            if (m_VertexArray == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create a VAO \"{debugName}\"", true);
+            PrimitiveFlags = flags;
+            int stride = 0;
+            int offset = 0;
 
-            _debugName = debugName;
-            SEDebug.Log(SEDebugState.Debug, $"Created a new VAO \"{debugName}\"");
+            if ((PrimitiveFlags & MeshPrimitives.Position) != 0) stride += 3;
+            if ((PrimitiveFlags & MeshPrimitives.TexCoord) != 0) stride += 2;
+            if ((PrimitiveFlags & MeshPrimitives.Normal) != 0) stride += 3;
+            if ((PrimitiveFlags & MeshPrimitives.Color) != 0) stride += 4;
+            stride *= sizeof(float);
+
+            if ((PrimitiveFlags & MeshPrimitives.Position) != 0)
+            {
+                GL.VertexAttribPointer((int)ShaderLayoutLocation.aPosition, 3, VertexAttribPointerType.Float, false, stride, offset);  // GL 2.0
+                GL.EnableVertexAttribArray((int)ShaderLayoutLocation.aPosition);  // GL 2.0
+                offset += 3 * sizeof(float);
+            }
+           // else GL.DisableVertexAttribArray((int)ShaderLayoutLocation.aPosition);
+
+            if ((PrimitiveFlags & MeshPrimitives.TexCoord) != 0)
+            {
+                GL.VertexAttribPointer((int)ShaderLayoutLocation.aTexCoord, 2, VertexAttribPointerType.Float, false, stride, offset);  // GL 2.0
+                GL.EnableVertexAttribArray((int)ShaderLayoutLocation.aTexCoord);  // GL 2.0
+                offset += 2 * sizeof(float);
+            }
+           // else GL.DisableVertexAttribArray((int)ShaderLayoutLocation.aTexCoord);
+
+            if ((PrimitiveFlags & MeshPrimitives.Normal) != 0)
+            {
+                GL.VertexAttribPointer((int)ShaderLayoutLocation.aNormal, 3, VertexAttribPointerType.Float, false, stride, offset);  // GL 2.0
+                GL.EnableVertexAttribArray((int)ShaderLayoutLocation.aNormal);  // GL 2.0
+                offset += 3 * sizeof(float);
+            }
+           // else GL.DisableVertexAttribArray((int)ShaderLayoutLocation.aNormal);
+
+            if ((PrimitiveFlags & MeshPrimitives.Color) != 0)
+            {
+                GL.VertexAttribPointer((int)ShaderLayoutLocation.aColor, 4, VertexAttribPointerType.Float, false, stride, offset);  // GL 2.0
+                GL.EnableVertexAttribArray((int)ShaderLayoutLocation.aColor);  // GL 2.0
+            }
+           // else GL.DisableVertexAttribArray((int)ShaderLayoutLocation.aColor);
+
+            SEDebug.Log(SEDebugState.Debug, $"Set the VAO[{m_VertexArray}] to contain [{PrimitiveFlags}]");
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set()
-        {
-            GL.VertexAttribPointer((int)ShaderLayoutLocation.aPosition, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
-            GL.VertexAttribPointer((int)ShaderLayoutLocation.aTexCoord, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
-
-            GL.EnableVertexAttribArray((int)ShaderLayoutLocation.aPosition);
-            GL.EnableVertexAttribArray((int)ShaderLayoutLocation.aTexCoord);
-        }
-
-        public override string ToString() => _debugName ?? $"{m_VertexArray}";
+        public override string ToString() => $"VAO[{m_VertexArray}] [{PrimitiveFlags}]";
         public int GetHandle() => m_VertexArray;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -48,7 +80,7 @@ namespace SteelEngine.Core.Buffers
             if (_currentBound != m_VertexArray)
             {
                 _currentBound = m_VertexArray;
-                GL.BindVertexArray(m_VertexArray);
+                GL.BindVertexArray(m_VertexArray);  // GL 3.0
             }
         }
 
@@ -58,7 +90,7 @@ namespace SteelEngine.Core.Buffers
             if (_currentBound == m_VertexArray && _currentBound != 0)
             {
                 _currentBound = 0;
-                GL.BindVertexArray(0);
+                GL.BindVertexArray(0);  // GL 3.0
             }
         }
 
@@ -67,7 +99,8 @@ namespace SteelEngine.Core.Buffers
         {
             if (m_VertexArray != 0)
             {
-                GL.DeleteVertexArray(m_VertexArray);
+                ResourceManager.RemoveVAO(this);
+                GL.DeleteVertexArray(m_VertexArray);  // GL 3.0
 
                 _currentBound = 0;
                 m_VertexArray = 0;

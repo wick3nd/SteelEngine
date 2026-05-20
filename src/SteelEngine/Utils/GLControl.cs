@@ -659,8 +659,10 @@ namespace SteelEngine.Utils
 
     public static class GLControl
     {
-        public static int GLVersion => GLVersionInternal;  // Readonly - only visible to developers
-        internal static int GLVersionInternal = (GL.GetInteger(GetPName.MajorVersion) << 16) | GL.GetInteger(GetPName.MinorVersion);  // Changeable for debug purposes
+        public static int GLVersionMajor => GL.GetInteger(GetPName.MajorVersion);
+        public static int GLVersionMinor => GL.GetInteger(GetPName.MinorVersion);
+
+        internal static int GLVersionInternal = (GLVersionMajor << 16) | GLVersionMinor;  // Changeable for debug purposes
 
        // UBO
         public static int MaxUniformBufferBindings => GL.GetInteger(GetPName.MaxUniformBufferBindings);
@@ -677,7 +679,7 @@ namespace SteelEngine.Utils
         public static int MaxFramebufferSamples => GL.GetInteger(GetPName.MaxFramebufferSamples);
         public static int MaxIntegerSamples => GL.GetInteger(GetPName.MaxIntegerSamples);
 
-        private static readonly List<string> extensions = new(350);  // Prealocated 350 entries to avoid most of the resizing
+        private static readonly List<string> extensions = new(300);
 
         internal static void GetExtensions()
         {
@@ -693,11 +695,11 @@ namespace SteelEngine.Utils
 
         internal static void SetGLVersionDebug(int major, int minor) => GLVersionInternal = (major << 16) | minor;
 
-        public static bool GLVerGreater(int major, int minor) => GLVersion > ((major << 16) | minor);
-        public static bool GLVerGEqual(int major, int minor) => GLVersion >= ((major << 16) | minor);
-        public static bool GLVerEqual(int major, int minor) => GLVersion == ((major << 16) | minor);
-        public static bool GLVerLEqual(int major, int minor) => GLVersion <= ((major << 16) | minor);
-        public static bool GLVerLess(int major, int minor) => GLVersion < ((major << 16) | minor);
+        public static bool GLVerGreater(int major, int minor) => GLVersionInternal > ((major << 16) | minor);
+        public static bool GLVerGEqual(int major, int minor) => GLVersionInternal >= ((major << 16) | minor);
+        public static bool GLVerEqual(int major, int minor) => GLVersionInternal == ((major << 16) | minor);
+        public static bool GLVerLEqual(int major, int minor) => GLVersionInternal <= ((major << 16) | minor);
+        public static bool GLVerLess(int major, int minor) => GLVersionInternal < ((major << 16) | minor);
 
         internal static void RemoveExtDebug(GLExtension extension)
         {

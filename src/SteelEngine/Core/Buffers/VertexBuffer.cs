@@ -1,4 +1,5 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using SteelEngine.Elements.Interfaces;
 using SteelEngine.Utils;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -6,7 +7,7 @@ using System.Runtime.InteropServices;
 #pragma warning disable CA1816, IDE0079, CA1822
 namespace SteelEngine.Core.Buffers
 {
-    public class VertexBuffer : IBufferObject
+    public class VertexBuffer : IBufferObject, IEngineDisposable
     {
         private int m_VertexBuffer;
         private static int _currentBound;
@@ -16,18 +17,18 @@ namespace SteelEngine.Core.Buffers
         public VertexBuffer()
         {
             GL.GenBuffers(1, ref m_VertexBuffer);
-            if (m_VertexBuffer == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create a VBO", true);
-            SEDebug.Log(SEDebugState.Debug, $"Created a new VBO {m_VertexBuffer}");
+            if (m_VertexBuffer == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create a VBO[]", true);
+            SEDebug.Log(SEDebugState.Debug, $"Created a new VBO[{m_VertexBuffer}]");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public VertexBuffer(string debugName)
         {
             GL.GenBuffers(1, ref m_VertexBuffer);
-            if (m_VertexBuffer == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create a VBO \"{debugName}\"", true);
+            if (m_VertexBuffer == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create a VBO[] [{debugName}]", true);
 
             _debugName = debugName;
-            SEDebug.Log(SEDebugState.Debug, $"Created a new VBO \"{debugName}\"");
+            SEDebug.Log(SEDebugState.Debug, $"Created a new VBO[{m_VertexBuffer}] [{debugName}]");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -44,7 +45,7 @@ namespace SteelEngine.Core.Buffers
             GL.BufferSubData(BufferTarget.ArrayBuffer, offset, data.Length * Marshal.SizeOf<T>(), data.AsSpan());
         }
 
-        public override string ToString() => _debugName ?? $"{m_VertexBuffer}";
+        public override string ToString() => _debugName != "" ? $"VBO[{m_VertexBuffer}] [{_debugName}]" : $"VBO[{m_VertexBuffer}]";
         public int GetHandle() => m_VertexBuffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

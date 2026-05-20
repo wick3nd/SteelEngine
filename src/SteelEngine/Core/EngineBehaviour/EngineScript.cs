@@ -1,11 +1,8 @@
 using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Runtime.CompilerServices;
 
 namespace SteelEngine.Core
 {
-#pragma warning disable CS8618
     public abstract class EngineScript
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -21,10 +18,6 @@ namespace SteelEngine.Core
         public float deltaTime;
         public double deltaTimeD;
 
-        public NativeWindow window;
-        public KeyboardState keyboard;
-        public MouseState mouse;
-
         public virtual void OnStart() { }
         public virtual void OnInit() { }
         public virtual void OnExit() { }
@@ -34,7 +27,6 @@ namespace SteelEngine.Core
         public virtual void Update() { }
         public virtual void LateUpdate() { }
         public virtual void FixedUpdate(FrameEventArgs e) { }
-        public void Quit() => window!.Close();
 
        // public virtual void IsMousePressed(MouseButtonEventArgs e) { }
     }

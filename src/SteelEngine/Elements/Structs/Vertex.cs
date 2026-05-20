@@ -7,7 +7,7 @@ namespace SteelEngine.EngineBase.Structs
     internal struct Vertex
     {
         internal Vector3 position;
-        internal Vector3 normals;
-        internal Vector2 UV;
+        internal Vector3 normal;
+        internal Vector2 texCoord;
     }
 }

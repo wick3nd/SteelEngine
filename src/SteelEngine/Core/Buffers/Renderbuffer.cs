@@ -1,11 +1,12 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using SteelEngine.Elements.Interfaces;
 using SteelEngine.Utils;
 using System.Runtime.CompilerServices;
 
 #pragma warning disable CA1816
 namespace SteelEngine.Core.Buffers
 {
-    public class Renderbuffer : IBufferObject
+    public class Renderbuffer : IBufferObject, IEngineDisposable
     {
         private int m_RenderBuffer;
         private static int _currentBound;

@@ -1,11 +1,12 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using SteelEngine.Elements.Interfaces;
 using SteelEngine.Utils;
 using System.Runtime.CompilerServices;
 
 #pragma warning disable CA1816, IDE0079, CA1822
 namespace SteelEngine.Core.Buffers
 {
-    public class Framebuffer : IBufferObject
+    public class Framebuffer : IBufferObject, IEngineDisposable
     {
         private int m_FrameBuffer;
         private static int _currentBound;
@@ -44,21 +45,21 @@ namespace SteelEngine.Core.Buffers
         public void AttachColor(Texture2D texture)
         {
             _bufferMasks |= ClearBufferMask.ColorBufferBit;
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, (FramebufferAttachment)((int)FramebufferAttachment.ColorAttachment0 + colorBufferIndex++), TextureTarget.Texture2d, texture.GetHandle(), 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, (FramebufferAttachment)((int)FramebufferAttachment.ColorAttachment0 + colorBufferIndex++), TextureTarget.Texture2D, texture.GetHandle(), 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AttachColor(Renderbuffer renderBuffer)
         {
             _bufferMasks |= ClearBufferMask.ColorBufferBit;
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, (FramebufferAttachment)((int)FramebufferAttachment.ColorAttachment0 + colorBufferIndex++), TextureTarget.Texture2d, renderBuffer.GetHandle(), 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, (FramebufferAttachment)((int)FramebufferAttachment.ColorAttachment0 + colorBufferIndex++), TextureTarget.Texture2D, renderBuffer.GetHandle(), 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AttachDepth(Texture2D texture)
         {
             _bufferMasks |= ClearBufferMask.DepthBufferBit;
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2d, texture.GetHandle(), 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, texture.GetHandle(), 0);
 
             GL.DrawBuffer(DrawBufferMode.None);
             GL.ReadBuffer(ReadBufferMode.None);
@@ -78,21 +79,21 @@ namespace SteelEngine.Core.Buffers
         public void AttachStencil(Texture2D texture)
         {
             _bufferMasks |= ClearBufferMask.StencilBufferBit;
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.StencilAttachment, TextureTarget.Texture2d, texture.GetHandle(), 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.StencilAttachment, TextureTarget.Texture2D, texture.GetHandle(), 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AttachStencil(Renderbuffer renderBuffer)
         {
             _bufferMasks |= ClearBufferMask.StencilBufferBit;
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.StencilAttachment, TextureTarget.Texture2d, renderBuffer.GetHandle(), 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.StencilAttachment, TextureTarget.Texture2D, renderBuffer.GetHandle(), 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AttachDepthStencil(Texture2D texture)
         {
             _bufferMasks |= ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit;
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthStencilAttachment, TextureTarget.Texture2d, texture.GetHandle(), 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthStencilAttachment, TextureTarget.Texture2D, texture.GetHandle(), 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

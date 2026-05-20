@@ -5,6 +5,5 @@
         int GetHandle();
         void Enable() { }
         void Disable() { }
-        void Destroy() { }
     }
 }

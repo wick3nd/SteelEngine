@@ -19,11 +19,9 @@ namespace SteelEngine.Core
         {
             for (int i = 0; i < _behaviours.Count; i++)
             {
-                _behaviours[i].window = window;
-                _behaviours[i].keyboard = window.KeyboardState;
-                _behaviours[i].mouse = window.MouseState;
+                Input.CaptureInput(ref window);
+                Window.nativeWindow = window;
             }
-
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
