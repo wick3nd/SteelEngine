@@ -19,7 +19,7 @@ namespace SteelEngine.Core
         {
             for (int i = 0; i < _behaviours.Count; i++)
             {
-                Input.CaptureInput(ref window);
+               // Input.CaptureInput(ref window);
                 Window.nativeWindow = window;
             }
         }
@@ -31,16 +31,6 @@ namespace SteelEngine.Core
             {
                 _behaviours[i].windowWidth = width;
                 _behaviours[i].windowHeight = height;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void ExposeTime(double deltaTime)
-        {
-            for (int i = 0; i < _behaviours.Count; i++)
-            {
-                _behaviours[i].deltaTime = (float)deltaTime;
-                _behaviours[i].deltaTimeD = deltaTime;
             }
         }
 

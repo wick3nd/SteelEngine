@@ -13,9 +13,6 @@ namespace SteelEngine.Objects
         internal Matrix4 view;
         internal Matrix4 projection;
 
-        public Vector3 CamTarget { get; } = Vector3.Zero;
-        public Vector3 CamDirection { get; }
-
         public Vector3 Pos = Vector3.Zero;
         public Vector3 CamRight;
         public Vector3 CamUp;
@@ -30,15 +27,12 @@ namespace SteelEngine.Objects
         {
             CameraSystem.Add(name, this);
 
-            CamDirection = Vector3.Normalize(Pos - CamTarget);
-            CamRight = Vector3.Normalize(Vector3.Cross(Vector3.UnitY, CamDirection));
-            CamUp = Vector3.Cross(CamDirection, CamRight);
-
-            view = Matrix4.LookAt(new Vector3(0.0f, 0.0f, 3.0f),
-                                  new Vector3(0.0f, 0.0f, 0.0f),
-                                  new Vector3(0.0f, 1.0f, 0.0f));
-
             CamFront = new Vector3(0.0f, 0.0f, -1.0f);
+            CamRight = Vector3.Normalize(Vector3.Cross(CamFront, Vector3.UnitY));
+            CamUp = Vector3.Normalize(Vector3.Cross(CamRight, CamFront));
+
+            projection = Matrix4.CreatePerspectiveFieldOfView(FieldOfView * MathHelper.DegToRad, (float)windowWidth / windowHeight, NearPlaneDist, FarPlaneDist);
+            view = Matrix4.LookAt(Pos, Pos + CamFront, CamUp);
 
             frustum.camView = view;
             frustum.camProj = projection;
@@ -47,7 +41,7 @@ namespace SteelEngine.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override void Update()
         {
-            float aspectRatio = windowWidth / (float)windowHeight;
+            float aspectRatio = (float)windowWidth / windowHeight;
             float camPitchRad = CamPitch * MathHelper.DegToRad;
             float camYawRad = CamYaw * MathHelper.DegToRad;
 
@@ -56,9 +50,11 @@ namespace SteelEngine.Objects
                 MathF.Sin(camPitchRad),
                 MathF.Cos(camPitchRad) * MathF.Sin(camYawRad)
             ).Normalized();
+            CamRight = Vector3.Normalize(Vector3.Cross(CamFront, Vector3.UnitY));
+            CamUp = Vector3.Normalize(Vector3.Cross(CamRight, CamFront));
 
             projection = Matrix4.CreatePerspectiveFieldOfView(FieldOfView * MathHelper.DegToRad, aspectRatio, NearPlaneDist, FarPlaneDist);
-            view = Matrix4.LookAt(Pos, Pos + CamFront, Vector3.UnitY);
+            view = Matrix4.LookAt(Pos, Pos + CamFront, CamUp);
 
             frustum.camView = view;
             frustum.camProj = projection;

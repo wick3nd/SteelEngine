@@ -659,37 +659,34 @@ namespace SteelEngine.Utils
 
     public static class GLControl
     {
-        public static int GLVersionMajor => GL.GetInteger(GetPName.MajorVersion);
-        public static int GLVersionMinor => GL.GetInteger(GetPName.MinorVersion);
+        public static int GLVersionMajor => GL.GetInteger(GetPName.MajorVersion);  // GL 1.0
+        public static int GLVersionMinor => GL.GetInteger(GetPName.MinorVersion);  // GL 1.0
 
         internal static int GLVersionInternal = (GLVersionMajor << 16) | GLVersionMinor;  // Changeable for debug purposes
 
        // UBO
-        public static int MaxUniformBufferBindings => GL.GetInteger(GetPName.MaxUniformBufferBindings);
-        public static int MaxVertexUniformBlocks => GL.GetInteger(GetPName.MaxVertexUniformBlocks);
-        public static int MaxGeometryUniformBlocks => GL.GetInteger(GetPName.MaxGeometryUniformBlocks);
-        public static int MaxFragmentUniformBlocks => GL.GetInteger(GetPName.MaxFragmentUniformBlocks);
-        public static int MaxUniformBlockSize => GL.GetInteger(GetPName.MaxUniformBlockSize);
-        public static int UniformBufferOffsetAlignment => GL.GetInteger(GetPName.UniformBufferOffsetAlignment);
-        public static int UniformOffsetAlignment => GL.GetInteger(GetPName.UniformBufferOffsetAlignment);
+        public static int MaxUniformBufferBindings => GL.GetInteger(GetPName.MaxUniformBufferBindings);  // GL 1.0
+        public static int MaxVertexUniformBlocks => GL.GetInteger(GetPName.MaxVertexUniformBlocks);  // GL 1.0
+        public static int MaxGeometryUniformBlocks => GL.GetInteger(GetPName.MaxGeometryUniformBlocks);  // GL 1.0
+        public static int MaxFragmentUniformBlocks => GL.GetInteger(GetPName.MaxFragmentUniformBlocks);  // GL 1.0
+        public static int MaxUniformBlockSize => GL.GetInteger(GetPName.MaxUniformBlockSize);  // GL 1.0
+        public static int UniformBufferOffsetAlignment => GL.GetInteger(GetPName.UniformBufferOffsetAlignment);  // GL 1.0
+        public static int UniformOffsetAlignment => GL.GetInteger(GetPName.UniformBufferOffsetAlignment);  // GL 1.0
 
        // FBO
-        public static int MaxColorTextureSamples => GL.GetInteger(GetPName.MaxColorTextureSamples);
-        public static int MaxDepthTextureSamples => GL.GetInteger(GetPName.MaxDepthTextureSamples);
-        public static int MaxFramebufferSamples => GL.GetInteger(GetPName.MaxFramebufferSamples);
-        public static int MaxIntegerSamples => GL.GetInteger(GetPName.MaxIntegerSamples);
+        public static int MaxColorTextureSamples => GL.GetInteger(GetPName.MaxColorTextureSamples);  // GL 1.0
+        public static int MaxDepthTextureSamples => GL.GetInteger(GetPName.MaxDepthTextureSamples);  // GL 1.0
+        public static int MaxFramebufferSamples => GL.GetInteger(GetPName.MaxFramebufferSamples);  // GL 1.0
+        public static int MaxIntegerSamples => GL.GetInteger(GetPName.MaxIntegerSamples);  // GL 1.0
 
         private static readonly List<string> extensions = new(300);
 
         internal static void GetExtensions()
         {
-            for (uint i = 0; i < GL.GetInteger(GetPName.NumExtensions); i++)
+            for (uint i = 0; i < GL.GetInteger(GetPName.NumExtensions); i++)  // GL 1.0
             {
-                string? ext = GL.GetStringi(StringName.Extensions, i);
+                string? ext = GL.GetStringi(StringName.Extensions, i);  // GL 3.0
                 extensions.Add(ext!);
-#if DEBUG
-                SEDebug.LogAsync(SEDebugState.Debug, ext);
-#endif
             }
         }
 

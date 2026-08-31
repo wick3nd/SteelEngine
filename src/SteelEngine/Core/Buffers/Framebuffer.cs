@@ -42,21 +42,14 @@ namespace SteelEngine.Core.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AttachColor(Texture2D texture)
+        public void AttachColor(GLTexture2D texture)
         {
             _bufferMasks |= ClearBufferMask.ColorBufferBit;
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, (FramebufferAttachment)((int)FramebufferAttachment.ColorAttachment0 + colorBufferIndex++), TextureTarget.Texture2D, texture.GetHandle(), 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AttachColor(Renderbuffer renderBuffer)
-        {
-            _bufferMasks |= ClearBufferMask.ColorBufferBit;
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, (FramebufferAttachment)((int)FramebufferAttachment.ColorAttachment0 + colorBufferIndex++), TextureTarget.Texture2D, renderBuffer.GetHandle(), 0);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AttachDepth(Texture2D texture)
+        public void AttachDepth(GLTexture2D texture)
         {
             _bufferMasks |= ClearBufferMask.DepthBufferBit;
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, texture.GetHandle(), 0);
@@ -66,41 +59,17 @@ namespace SteelEngine.Core.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AttachDepth(Renderbuffer renderBuffer)
-        {
-            _bufferMasks |= ClearBufferMask.DepthBufferBit;
-            GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, renderBuffer.GetHandle());
-
-            GL.DrawBuffer(DrawBufferMode.None);
-            GL.ReadBuffer(ReadBufferMode.None);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AttachStencil(Texture2D texture)
+        public void AttachStencil(GLTexture2D texture)
         {
             _bufferMasks |= ClearBufferMask.StencilBufferBit;
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.StencilAttachment, TextureTarget.Texture2D, texture.GetHandle(), 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AttachStencil(Renderbuffer renderBuffer)
-        {
-            _bufferMasks |= ClearBufferMask.StencilBufferBit;
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.StencilAttachment, TextureTarget.Texture2D, renderBuffer.GetHandle(), 0);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AttachDepthStencil(Texture2D texture)
+        public void AttachDepthStencil(GLTexture2D texture)
         {
             _bufferMasks |= ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit;
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthStencilAttachment, TextureTarget.Texture2D, texture.GetHandle(), 0);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AttachDepthStencil(Renderbuffer renderBuffer)
-        {
-            _bufferMasks |= ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit;
-            GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthStencilAttachment, RenderbufferTarget.Renderbuffer, renderBuffer.GetHandle());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

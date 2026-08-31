@@ -1,73 +1,61 @@
-﻿using SteelEngine.Core.Buffers;
+﻿using SharpGLTF.Schema2;
 using SteelEngine.Utils;
 using System.Runtime.CompilerServices;
 
-namespace SteelEngine.Core.EngineBehaviour
+namespace SteelEngine.Core
 {
     internal static class ResourceManager  // Add some debug things later on
     {
-        static readonly Dictionary<MeshPrimitives, VertexArray> VAOCache = new(EngineCoreSettings.StartUpVAOEntryCount);
-        static readonly Dictionary<string, ShaderContainer> shaderCache = new(EngineCoreSettings.StartUpShaderEntryCount);
-        static readonly Dictionary<string, Texture2D> texture2DCache = new(EngineCoreSettings.StartUpTextureEntryCount);
+       // private static readonly Dictionary<string, ShaderContainer> _shaderCache = [];
+        private static readonly Dictionary<string, TextureContainer> _textureCache = [];
+        private static readonly Dictionary<string, MaterialContainer> _materialCache = [];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void CacheVAO(VertexArray vao)
+        internal static void CacheTextureInfo(TextureContainer texture)
         {
-            bool wasCached = !VAOCache.TryAdd(vao.PrimitiveFlags, vao);
+            bool wasCached = _textureCache.TryAdd(texture.path, texture);
 
-            if (wasCached) SEDebug.Log(SEDebugState.Debug, $"Cached VAO[{vao.GetHandle()}] [{vao.PrimitiveFlags}]");
+            if (wasCached) SEDebug.Log(SEDebugState.Debug, $"Cached Texture2D[{texture}]");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static VertexArray TryGetOrCreateVAO(MeshPrimitives primitives)
+        internal static bool TryGetTextureInfo(string path, out TextureContainer texture)
         {
-            if (VAOCache.TryGetValue(primitives, out VertexArray? vao))
-            {
-                SEDebug.Log(SEDebugState.Debug, $"Parsed VAO[{vao.GetHandle()}] [{primitives}]");
-                return vao;
-            }
-            
-            return new();
+            if (_textureCache.TryGetValue(Path.GetRelativePath(Environment.CurrentDirectory, path), out texture)) return true;
+
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void RemoveVAO(VertexArray vao)
+        internal static void RemoveTextureInfo(string path)
         {
-            SEDebug.Log(SEDebugState.Debug, $"Disposing VAO[{vao.GetHandle()}] [{vao.PrimitiveFlags}]");  // No, it has not be removed >:)
+            SEDebug.Log(SEDebugState.Debug, $"Disposing TextureContainer[{path}]");
 
-            VAOCache.Remove(vao.PrimitiveFlags);  // Just kidding :)
-        }
-
-       // The fuck
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void CacheTexture2D(Texture2D texture2D)
-        {
-            bool wasCached = !texture2DCache.TryAdd(texture2D.ToString(), texture2D);
-
-            if (wasCached) SEDebug.Log(SEDebugState.Debug, $"Cached Texture2D[{texture2D}]");
+            _materialCache.Remove(Path.GetRelativePath(Environment.CurrentDirectory, path));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Texture2D TryGetOrCreateTexture2D(string x)  // Works only for normal textuers, not RBO
+        internal static void CacheMaterial(MaterialContainer material)
         {
-            if (texture2DCache.TryGetValue(x, out Texture2D? texture))
-            {
-                SEDebug.Log(SEDebugState.Debug, $"Parsed Texture2D[{texture}]");
-                return texture;
-            }
-            
-            Texture2D texture2D = new(x);
-            CacheTexture2D(texture2D);
-            return texture2D;
+            bool wasCached = !_materialCache.TryAdd(material.Name, material);
+
+            if (wasCached) SEDebug.Log(SEDebugState.Debug, $"Cached MaterialInfo[{material.Name}]");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void RemoveTexture2D(Texture2D texture2D)
+        internal static bool TryGetMaterial(string name, out MaterialContainer material)
         {
-            SEDebug.Log(SEDebugState.Debug, $"Disposing Texture2D[{texture2D}]");
+            if (_materialCache.TryGetValue(name, out material)) return true;
 
-            texture2DCache.Remove(texture2D.ToString());
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void RemoveMaterial(string name)
+        {
+            SEDebug.Log(SEDebugState.Debug, $"Disposing MaterialInfo[{name}]");
+
+            _materialCache.Remove(name);
         }
     }
 }

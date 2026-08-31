@@ -8,10 +8,10 @@ namespace SteelEngine.Core
     {
        // Misc
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetProgramTexture2D(Shader shader, string name, Texture2D texture, TextureUnit unit)
+        public static void SetProgramTexture2D(Shader shader, string name, GLTexture2D texture, TextureUnit unit)
         {
             texture.SetUnit(unit);
-            texture.Enable();
+            texture.Bind();
 
             SetProgramInt(shader, name, (int)unit-33984);
         }

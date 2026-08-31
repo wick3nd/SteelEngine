@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using System.Runtime.InteropServices;
 
-namespace SteelEngine.Core.EngineBehaviour
+namespace SteelEngine.Core
 {
     [StructLayout(LayoutKind.Sequential)]
     internal struct ShaderContainer(int handle, ShaderType type)

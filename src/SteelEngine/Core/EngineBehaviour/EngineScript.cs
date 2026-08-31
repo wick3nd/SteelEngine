@@ -15,9 +15,6 @@ namespace SteelEngine.Core
         public int windowWidth;
         public int windowHeight;
 
-        public float deltaTime;
-        public double deltaTimeD;
-
         public virtual void OnStart() { }
         public virtual void OnInit() { }
         public virtual void OnExit() { }

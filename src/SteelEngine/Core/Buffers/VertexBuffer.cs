@@ -4,7 +4,6 @@ using SteelEngine.Utils;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-#pragma warning disable CA1816, IDE0079, CA1822
 namespace SteelEngine.Core.Buffers
 {
     public class VertexBuffer : IBufferObject, IEngineDisposable

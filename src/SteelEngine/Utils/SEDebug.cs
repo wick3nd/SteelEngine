@@ -1,5 +1,6 @@
-﻿using OpenTK.Graphics.Glx;
+﻿using OpenTK.Graphics.OpenGL;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace SteelEngine.Utils
 {
@@ -12,63 +13,76 @@ namespace SteelEngine.Utils
         Error
     };
     
-    class SEDebug
-    {   
+    public static class SEDebug
+    {
+        internal static GLDebugProc DebugMessageDelegate = OnDebugMessage;
         private static readonly string _fileName = @$"Logs\log_{DateTime.Now:yyyyMMddhhmmss}.txt";
-        private static readonly StreamWriter stream = new(_fileName, true);
+        private static readonly StreamWriter _stream = new(_fileName, true);
+        private static string _debugStringCache = "";
 
-        private static readonly Dictionary<SEDebugState, ConsoleColor> _colorMap = new()
+        private static readonly Dictionary<DebugType, SEDebugState> _stateMap = new()
         {
-            { SEDebugState.Log, ConsoleColor.White },
-            { SEDebugState.Info, ConsoleColor.Cyan },
-            { SEDebugState.Warning, ConsoleColor.DarkYellow },
-            { SEDebugState.Error, ConsoleColor.DarkRed }
+            { DebugType.DebugTypeError, SEDebugState.Error },
+            { DebugType.DebugTypeDeprecatedBehavior, SEDebugState.Warning },
+            { DebugType.DebugTypeOther, SEDebugState.Debug },
+            { DebugType.DebugTypePerformance, SEDebugState.Warning },
+            { DebugType.DebugTypeUndefinedBehavior, SEDebugState.Error },
+            { DebugType.DontCare, SEDebugState.Info }
         };
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static async Task LogAsync<T>(SEDebugState state, T text, bool throwException = false)
+        internal static void Init()
         {
-            string log = $" [{DateTime.Now:hh:mm:ss}] | [{state}]    {text}{Environment.NewLine}";
-            var previousColor = Console.ForegroundColor;
-
-            if (!throwException)
-            {
-                Console.ForegroundColor = _colorMap.GetValueOrDefault(state, previousColor);
-                await stream.WriteAsync(log);
-
-#if DEBUG
-                Console.Out.Write($"{log}");
-#endif
-                Console.ForegroundColor = previousColor;
-
-                return;
-            }
-
-            await stream.WriteAsync(log);
-            throw new Exception(log);
+            if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static async void Log<T>(SEDebugState state, T text, bool throwException = false)
         {
-            string log = $" [{DateTime.Now:hh:mm:ss}] | [{state}]    {text}{Environment.NewLine}";
-            var previousColor = Console.ForegroundColor;
+            string log = $" [{DateTime.Now:hh:mm:ss}] | [{Pad(state)}]    {text}{Environment.NewLine}";
+            _debugStringCache += log;
 
-            if (!throwException)
+            if (!throwException) return;
+
+            Flush();
+            throw new Exception();
+        }
+
+        /// <summary>
+        /// Should not be needed but is here because of a dumb logging implementation
+        /// </summary>
+        public static async void Pad()
+        {
+            _debugStringCache += Environment.NewLine;
+        }
+
+        private static void OnDebugMessage(DebugSource source, DebugType type, uint id, DebugSeverity severity, int length, IntPtr pMessage, IntPtr pUserParam)      // The pointer you gave to OpenGL, explained later.
+        {
+            string message = Marshal.PtrToStringAnsi(pMessage, length);
+
+            string log = $" [{DateTime.Now:hh:mm:ss}] | [{Pad(_stateMap.GetValueOrDefault(type, SEDebugState.Debug))}]    {message}{Environment.NewLine}";
+            _debugStringCache += log;
+
+            if (type == DebugType.DebugTypeError)
             {
-                Console.ForegroundColor = _colorMap.GetValueOrDefault(state, previousColor);
-                await stream.WriteAsync(log);
-
-#if DEBUG
-                Console.Out.Write($"{log}");
-#endif
-                Console.ForegroundColor = previousColor;
-
-                return;
+                Flush();
+                throw new Exception();
             }
+        }
 
-            await stream.WriteAsync(log);
-            throw new Exception(log);
+        internal static void Flush()
+        {
+            Console.Out.Write($"{_debugStringCache}");
+
+
+            _stream.Write(_debugStringCache);
+            _stream.Flush();
+
+            _debugStringCache = "";
+        }
+
+        static string Pad(SEDebugState state)
+        {
+            string text = state.ToString();
+            return text.Length > 9 ? text[.. 9] : text.PadRight(9);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using OpenTK.Graphics.OpenGL;
-using SteelEngine.Core.EngineBehaviour;
 using SteelEngine.Utils;
 using System.Runtime.CompilerServices;
 
@@ -25,7 +24,7 @@ namespace SteelEngine.Core
         //===============================================
 
         private int m_Shader;
-        private static int _currentBound;
+        internal static int currentBound;
         private readonly string? _debugName;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,9 +95,9 @@ namespace SteelEngine.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Enable()
         {
-            if (_currentBound != m_Shader)
+            if (currentBound != m_Shader)
             {
-                _currentBound = m_Shader;
+                currentBound = m_Shader;
                 GL.UseProgram(m_Shader);
             }
         }
@@ -106,9 +105,9 @@ namespace SteelEngine.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Disable()
         {
-            if (_currentBound == m_Shader && _currentBound != 0)
+            if (currentBound == m_Shader && currentBound != 0)
             {
-                _currentBound = 0;
+                currentBound = 0;
                 GL.UseProgram(0);
             }
         }
@@ -121,7 +120,7 @@ namespace SteelEngine.Core
                 SEDebug.Log(SEDebugState.Info, $"Disposing shader handle {m_Shader}");
                 GL.DeleteProgram(m_Shader);
 
-                _currentBound = 0;
+                currentBound = 0;
                 m_Shader = 0;
             }
         }
