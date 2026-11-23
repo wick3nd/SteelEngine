@@ -1,5 +1,4 @@
 ﻿using OpenTK.Graphics.OpenGL;
-using SteelEngine.Core.EngineBehaviour;
 using SteelEngine.Elements.Interfaces;
 using SteelEngine.Utils;
 using System.Runtime.CompilerServices;
@@ -8,8 +7,6 @@ namespace SteelEngine.Core.Buffers
 {
     public class VertexArray : IBufferObject, IEngineDisposable
     {
-        internal bool generated = false;
-
         int m_VertexArray;
         static int _currentBound;
 
@@ -68,7 +65,7 @@ namespace SteelEngine.Core.Buffers
             }
            // else GL.DisableVertexAttribArray((int)ShaderLayoutLocation.aColor);
 
-            SEDebug.Log(SEDebugState.Debug, $"Set the VAO[{m_VertexArray}] to contain [{PrimitiveFlags}]");
+           // SEDebug.Log(SEDebugState.Debug, $"Set the VAO[{m_VertexArray}] to contain [{PrimitiveFlags}]");
         }
 
         public override string ToString() => $"VAO[{m_VertexArray}] [{PrimitiveFlags}]";
@@ -99,7 +96,6 @@ namespace SteelEngine.Core.Buffers
         {
             if (m_VertexArray != 0)
             {
-                ResourceManager.RemoveVAO(this);
                 GL.DeleteVertexArray(m_VertexArray);  // GL 3.0
 
                 _currentBound = 0;

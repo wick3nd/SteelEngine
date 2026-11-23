@@ -8,10 +8,16 @@
         aColor = 3,
         aTangent = 4,
 
+
+
         iColor = 8,
         iModel = 9,
        // iModel = 10,
        // iModel = 11,
        // iModel = 12, spaces that the iModel takes up
+
+        gPosition = 16,
+        gNormal = 17,
+        gSpecular = 18,
     }
 }

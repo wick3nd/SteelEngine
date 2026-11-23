@@ -1,117 +1,92 @@
-﻿using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
-using SteelEngine.Core.Buffers;
-using SteelEngine.Core.EngineBehaviour;
-using SteelEngine.Elements.Interfaces;
-using SteelEngine.Objects;
+﻿using OpenTK.Mathematics;
+using SteelEngine.Elements;
 using SteelEngine.Utils;
-using System.Runtime.CompilerServices;
 
-namespace SteelEngine.Core
+namespace SteelEngine
 {
-    public class Mesh : IEngineDisposable
+    public class Mesh
     {
-        readonly VertexArray _vertexArrayObject;
-        readonly VertexBuffer _vertexBufferObject;
-        readonly ElementBuffer _elementBufferObject;
-        readonly VertexBuffer _instanceVertexBufferObject;
+        private readonly MeshMetadata _metadata;
+        internal GLMesh mesh;
+       // internal Shader Shader;
+        public Transform transform;
+        public bool IsVisible { get; private set; }
+        public bool IsDestroyed { get; private set; }
 
-        readonly string _name;
+        private Vector3 objectCenter;
+        private Box3 boundingBox;
+        private float radius;
 
-        readonly GLTFMeshLoader _mesh;
-        bool drawn;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Mesh(string path, string debugName = "")
+        public Mesh(string path)
         {
-            _mesh = new(path, out MeshPrimitives flags, new() { });
-            _name = debugName == "" ? Path.GetRelativePath(Environment.CurrentDirectory, path) : debugName;
-            
-            _vertexArrayObject = ResourceManager.TryGetOrCreateVAO(flags);
-            _vertexBufferObject = new(_name);
-            _elementBufferObject = new(_name);
-            _instanceVertexBufferObject = new(_name);
-
-            _vertexArrayObject.Enable();
-
-            _vertexBufferObject.Enable();
-            _vertexBufferObject.Data(_mesh.verticeData.ToArray());
-
-            _elementBufferObject.Enable();
-            _elementBufferObject.Data(_mesh.indices.ToArray());
-
-            if (!_vertexArrayObject.generated)
+            _metadata = new()
             {
-                _vertexArrayObject.Set(flags);
-                _vertexArrayObject.generated = true;
-            }
-            
-            ResourceManager.CacheVAO(_vertexArrayObject);
-            SEDebug.Log(SEDebugState.Info, $"Created a new Mesh \"{this}\"");
+                path = path,
+                debugName = Path.GetRelativePath(Environment.CurrentDirectory, path)
+            };
+            mesh = new(_metadata.path, _metadata.debugName);
+            boundingBox = CalculateBoundingBox();
+            objectCenter = boundingBox.Center;
         }
 
-       // THIS DOES NOT IN WORK IN PURE 3.2
-       // CHANGE IT
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Draw(Matrix4[] instanceData)
+        public Mesh(string path, string debugName)
         {
-            PrimitiveType type = PrimitiveType.Triangles;
-
-            _vertexArrayObject.Enable();
-            _instanceVertexBufferObject.Enable();
-
-            nint size = instanceData.Length * 64;  // multiplied by size of Matrix4 (float)
-            GL.BufferData(BufferTarget.ArrayBuffer, size, instanceData.AsSpan(), BufferUsage.StaticDraw);
-
-            for (uint i = 0; i < 4; i++)
+            _metadata = new()
             {
-                uint loc = (uint)ShaderLayoutLocation.iModel + i;
-                GL.EnableVertexAttribArray(loc);  // GL 2.0
-                GL.VertexAttribPointer(loc, 4, VertexAttribPointerType.Float, false, 64, (nint)(i * 16));  // GL 2.0
-
-                if (GLControl.GLVerGEqual(3, 3))
-                {
-                    GL.VertexAttribDivisor(loc, 1);  // GL 3.3
-                    continue;
-                }
-
-                else if (GLControl.SupportsExt(GLExtension.ARB_instanced_arrays))
-                {
-                    GL.ARB.VertexAttribDivisorARB(loc, 1);  // GL_ARB_instanced_arrays
-                    continue;
-                }
-
-                else throw new NotSupportedException($"Your GPU does not have a {nameof(GLExtension.ARB_instanced_arrays)} extension or doesn't have a opengl 3.3 driver");
-            }
-            GL.DrawElementsInstanced(type, _elementBufferObject.Size(), DrawElementsType.UnsignedInt, 0, instanceData.Length);  // GL 3.1
-            
-            if (!drawn)
-            {
-                SEDebug.Log(SEDebugState.Debug, $"Drawn mesh \"{this}\" in {instanceData.Length} location(s)");
-                drawn = true;
-            }
+                path = path,
+                debugName = debugName
+            };
+            mesh = new(_metadata.path, _metadata.debugName);
+            boundingBox = CalculateBoundingBox();
+            objectCenter = boundingBox.Center;
         }
 
-        public override string ToString() => _name;
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public int GetVAOHandle() => _vertexArrayObject.GetHandle();
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public int GetVBOHandle() => _vertexBufferObject.GetHandle();
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public int GetEBOHandle() => _elementBufferObject.GetHandle();
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public int GetIVBOHandle() => _instanceVertexBufferObject.GetHandle();
+        public void Transform(Vector3 position, Vector3 scale, Vector3 rotation)
+        {
+            transform = new()
+            {
+                Position = position,
+                Scale = scale,
+                Rotation = rotation
+            };
+        }
+        public Transform GetNodeTransform(string nodeName)
+        {
+            bool isValuePresent = mesh.meshLoader.primitiveTransform.TryGetValue(nodeName, out Transform value);
+            if (isValuePresent) return value;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            SEDebug.Log(SEDebugState.Debug, $"Couldn't find a node named {nodeName}");
+            return new Transform();
+        }
+        public void Hidden(bool visible)
+        {
+            IsVisible = visible;
+            mesh.render = visible;
+        }
         public void Destroy()
         {
-            SEDebug.Log(SEDebugState.Info, $"Disposing Mesh \"{this}\"");
-
-            _instanceVertexBufferObject?.Destroy();
-            _vertexBufferObject?.Destroy();
-            _vertexArrayObject?.Destroy();
-            _elementBufferObject?.Destroy();
-
-            drawn = false;
+            if (!IsDestroyed)
+            {
+                mesh.Destroy();
+                boundingBox = Box3.Zero;
+                objectCenter = Vector3.Zero;
+                radius = 0;
+            }
+        }
+        public void Recreate()
+        {
+            if (IsDestroyed)
+            {
+                mesh = new(_metadata.path, _metadata.debugName);
+                boundingBox = CalculateBoundingBox();
+                objectCenter = boundingBox.Center;
+               // radius = null; // <--
+            }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Dispose() => Destroy();
+        Box3 CalculateBoundingBox()
+        {
+            return Box3.UnitCube;
+        }
     }
 }

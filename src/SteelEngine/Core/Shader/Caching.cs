@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using System.Runtime.CompilerServices;
 
-namespace SteelEngine.Core
+namespace SteelEngine
 {
     public partial class Shader
     {

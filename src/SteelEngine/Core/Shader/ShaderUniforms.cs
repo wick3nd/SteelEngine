@@ -2,16 +2,16 @@
 using OpenTK.Mathematics;
 using System.Runtime.CompilerServices;
 
-namespace SteelEngine.Core
+namespace SteelEngine
 {
     public partial class Shader
     {
        // Misc
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetTexture2D(string name, Texture2D texture, TextureUnit unit)
+        public void SetTexture2D(string name, GLTexture2D texture, TextureUnit unit)
         {
             texture.SetUnit(unit);
-            texture.Enable();
+            texture.Bind();
 
             SetInt(name, (int)unit-33984);
         }

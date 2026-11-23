@@ -3,6 +3,6 @@
     internal interface IEngineDisposable : IDisposable
     {
         public void Destroy() { }
-        internal new void Dispose() { }
+        internal void Dispose() { }
     }
 }

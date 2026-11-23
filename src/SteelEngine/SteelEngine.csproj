@@ -2,8 +2,9 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	<CETCompat>True</CETCompat>
 	  
 	<FileVersion>0.0.0.1</FileVersion>
     <AssemblyVersion>0.0.0.1</AssemblyVersion>
@@ -11,11 +12,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-	  
+    
     <PublishAot>True</PublishAot>
     <PublishTrimmed>True</PublishTrimmed>
-    <IlcDehydrate>true</IlcDehydrate>
-	  <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
+    <IlcDehydrate>True</IlcDehydrate>
+	<IlcFoldIdenticalMethodBodies>True</IlcFoldIdenticalMethodBodies>
 	  
     <Authors>wickend</Authors>
     <Company>Microsoft</Company>
@@ -41,14 +42,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Hardware.Info.Aot" Version="110.0.0.1" />
     <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
     <PackageReference Include="OpenTK" Version="5.0.0-pre.16" />
     <PackageReference Include="SDL3-CS" Version="3.5.0-preview.20260213-150035" />
     <PackageReference Include="SDL3-CS.Native" Version="3.5.0-preview.20260205-174353" />
-    <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
-    <PackageReference Include="SharpGLTF.Runtime" Version="1.0.6" />
-    <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.6" />
-    <PackageReference Include="StbImageSharp" Version="2.30.15" />
+    <PackageReference Include="SharpGLTF.Core" Version="1.0.7" />
+    <PackageReference Include="SharpGLTF.Runtime" Version="1.0.7" />
+    <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.7" />
+    <PackageReference Include="StbImageSharp" Version="2.30.16" />
+    <PackageReference Include="w3.CRC" Version="1.0.0" />
+    <PackageReference Include="ZstdSharp.Port" Version="0.8.8" />
   </ItemGroup>
 
   <ItemGroup>

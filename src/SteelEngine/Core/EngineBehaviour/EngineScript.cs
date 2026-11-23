@@ -1,33 +1,27 @@
-using OpenTK.Windowing.Common;
-using System.Runtime.CompilerServices;
+using OpenTK.Mathematics;
 
 namespace SteelEngine.Core
 {
     public abstract class EngineScript
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected EngineScript()
         {
             OnInit();
             BehaviourManager.Add(this);
         }
 
-        public int windowWidth;
-        public int windowHeight;
-
-        public float deltaTime;
-        public double deltaTimeD;
+        public Vector2i windowSize { get; set; }  // Move to Window
+        public Vector2i windowPosition { get; set; }
 
         public virtual void OnStart() { }
         public virtual void OnInit() { }
         public virtual void OnExit() { }
-        public virtual void OnResize(ResizeEventArgs e) { }
-        public virtual void OnFrameBufferResize(FramebufferResizeEventArgs e) { }
-        public virtual void OnFrameUpdate(FrameEventArgs e) { }
+        public virtual void OnResize() { }
+        public virtual void OnWindowPosChange() { }
+        public virtual void OnFrameBufferResize() { }
+        public virtual void OnFrameUpdate() { }
         public virtual void Update() { }
         public virtual void LateUpdate() { }
-        public virtual void FixedUpdate(FrameEventArgs e) { }
-
-       // public virtual void IsMousePressed(MouseButtonEventArgs e) { }
+        public virtual void FixedUpdate() { }
     }
 }

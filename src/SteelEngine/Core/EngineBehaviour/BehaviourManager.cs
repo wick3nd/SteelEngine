@@ -1,5 +1,5 @@
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
 using System.Runtime.CompilerServices;
 
 namespace SteelEngine.Core
@@ -15,32 +15,11 @@ namespace SteelEngine.Core
         internal static void Remove(EngineScript script) => _behaviours.Remove(script);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void ExposeInformation(NativeWindow window)
-        {
-            for (int i = 0; i < _behaviours.Count; i++)
-            {
-                Input.CaptureInput(ref window);
-                Window.nativeWindow = window;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ExposeResolution(int width, int height)
         {
             for (int i = 0; i < _behaviours.Count; i++)
             {
-                _behaviours[i].windowWidth = width;
-                _behaviours[i].windowHeight = height;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void ExposeTime(double deltaTime)
-        {
-            for (int i = 0; i < _behaviours.Count; i++)
-            {
-                _behaviours[i].deltaTime = (float)deltaTime;
-                _behaviours[i].deltaTimeD = deltaTime;
+                _behaviours[i].windowSize = (width, height);
             }
         }
 
@@ -57,21 +36,21 @@ namespace SteelEngine.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void ResizeCall(ResizeEventArgs e)
+        internal static void ResizeCall()
         {
-            for (int i = 0; i < _behaviours.Count; i++) _behaviours[i].OnResize(e);
+            for (int i = 0; i < _behaviours.Count; i++) _behaviours[i].OnResize();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void FrameBufferResizeCall(FramebufferResizeEventArgs e)
+        internal static void FrameBufferResizeCall()
         {
-            for (int i = 0; i < _behaviours.Count; i++) _behaviours[i].OnFrameBufferResize(e);
+            for (int i = 0; i < _behaviours.Count; i++) _behaviours[i].OnFrameBufferResize();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void FrameUpdateCall(FrameEventArgs args)
+        internal static void FrameUpdateCall()
         {
-            for (int i = 0; i < _behaviours.Count; i++) _behaviours[i].OnFrameUpdate(args);
+            for (int i = 0; i < _behaviours.Count; i++) _behaviours[i].OnFrameUpdate();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,9 +64,19 @@ namespace SteelEngine.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void FixedUpdateCall(FrameEventArgs e)
+        internal static void WindowPosChange(Vector2i pos)
         {
-            for (int i = 0; i < _behaviours.Count; i++) _behaviours[i].FixedUpdate(e);
+            for (int i = 0; i < _behaviours.Count; i++)
+            {
+                _behaviours[i].windowPosition = pos;
+                _behaviours[i].OnWindowPosChange();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void FixedUpdateCall()
+        {
+            for (int i = 0; i < _behaviours.Count; i++) _behaviours[i].FixedUpdate();
         }
     }
 }
