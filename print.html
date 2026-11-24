@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-414ab7b5.js";
+            window.path_to_searchindex_js = "searchindex-b3dc47f6.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-10c43d05.js"></script>
+        <script src="toc-d9285a79.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -192,7 +192,15 @@
 <h3 id="additions"><a class="header" href="#additions">Additions</a></h3>
 <ul>
 <li>Added a ability to throw exceptions directly in <code>SEDebug</code> instead of doing ones separately</li>
-<li>Added a <code>UBO</code> class</li>
+<li>Added a <code>UniformBuffer</code> class
+<ul>
+<li><code>Resize</code></li>
+<li><code>BufferBase</code></li>
+<li><code>BufferRange</code></li>
+<li><code>Data</code></li>
+<li><code>Init</code></li>
+</ul>
+</li>
 <li>Added new variables to <code>GLControl</code>:
 <ul>
 <li><code>MaxUniformBufferBindings</code></li>
@@ -210,7 +218,8 @@
 <li><code>SetProgramTexture2D</code></li>
 </ul>
 </li>
-<li>Added a <code>IBufferObject</code> interface</li>
+<li>Added a IBufferObject interface</li>
+<li>Added temporary buffer classes</li>
 </ul>
 <h3 id="changes"><a class="header" href="#changes">Changes</a></h3>
 <ul>
@@ -220,24 +229,53 @@
 <li>Renamed <code>SteelEngine.Elements</code> to <code>SteelEngine.Objects</code></li>
 <li>Moved <code>SteelEngine.Structs</code> to <code>SteelEngine.Elements</code></li>
 <li>Removed the usage of <code>EngineScript</code> in core scripts</li>
+<li>Reduced needed ammount of calls to update <code>EngineScript</code> parameters and functions</li>
+<li>Changed the default <code>aTexCoord</code> layout location to <code>2</code></li>
+<li>Changed the default <code>iModel</code> layout location to <code>9</code></li>
+<li>Added extra bind checks to all core objects in order to reduce driver calls</li>
+<li>Renamed Buffer classes to their <em>fuller</em> names</li>
 </ul>
 <h3 id="fixes"><a class="header" href="#fixes">Fixes</a></h3>
 <ul>
 <li>Fixed <code>SEDebug</code> not being able to write to a file</li>
 <li>Fixed <code>SEDebug</code> crashing when writing a lot of lines to a file</li>
-<li></li>
 </ul>
 <h3 id="deletions"><a class="header" href="#deletions">Deletions</a></h3>
 <ul>
 <li><code>SEObject</code></li>
 <li><code>Material</code></li>
 </ul>
+<p>other small possibly undocumented changes</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="chapter-1-window-creation"><a class="header" href="#chapter-1-window-creation">Chapter 1: Window creation</a></h1>
+<p>Lorem Ipsum</p>
+<pre><code class="language-C#">public class BaseApp : SEWindow
+{
+    public BaseApp() : base("mainWindow", new SEWindowSettings()
+    {
+        Title = "Test",
+        WindowFlags = WindowFlags.Resizable,
+        Context = ContextAPI.OpenGL
+    }) { }
+}
+</code></pre>
+<p>Lorem Ipsum</p>
+<pre><code class="language-C#">private static void Main()
+{
+    var window = new BaseApp();
+
+    _ = new Program();  // Your program entry point
+
+    window.Run();
+}
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="windowing"><a class="header" href="#windowing">Windowing</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="sewindow"><a class="header" href="#sewindow">SEWindow</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="core"><a class="header" href="#core">Core</a></h1>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="objects"><a class="header" href="#objects">Objects</a></h1>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="mathematics"><a class="header" href="#mathematics">Mathematics</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="utils"><a href="#utils" class="header">Utils</a></h1>
 
@@ -264,22 +302,6 @@
         <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
         <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
         <script>
