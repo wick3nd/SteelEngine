@@ -2,6 +2,7 @@
 using SteelEngine.Elements.Interfaces;
 using SteelEngine.Utils;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 #pragma warning disable CA1816
 namespace SteelEngine.Core.Buffers
@@ -13,6 +14,8 @@ namespace SteelEngine.Core.Buffers
         private readonly string? _debugName;
 
         private int _size;
+        private BufferBuilder[] _builderCopy;
+        private byte[] _internalBuffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UniformBuffer(string debugName, int size)
@@ -34,10 +37,37 @@ namespace SteelEngine.Core.Buffers
             if (_UniformBuffer == 0) SEDebug.Log(SEDebugState.Error, $"Failed to create a UBO \"{debugName}\"", true);
 
             _debugName = debugName;
-            for (int i = 0; i < dataTypes.Length; i++) _size += dataTypes[i].size;  // 
+            PrepareInternalBuffer(dataTypes);
 
             Init();
             SEDebug.Log(SEDebugState.Debug, $"Created a new UBO \"{debugName}\"");
+        }
+
+        void PrepareInternalBuffer(BufferBuilder[] dataTypes)
+        {
+            for (int i = 0; i < dataTypes.Length; i++) _size += dataTypes[i].size;
+            _builderCopy = dataTypes;
+            _internalBuffer = new byte[_size];
+        }
+
+        int updatedVariables = 0;
+        public void Update<T>(T variable) where T: unmanaged
+        {
+            var bytes = MemoryMarshal.AsBytes(MemoryMarshal.CreateReadOnlySpan(ref variable, 1));
+            bytes.CopyTo(_internalBuffer.AsSpan(updatedVariables * _builderCopy[updatedVariables].size));
+            
+            if (++updatedVariables == _builderCopy.Length)
+            {
+                updatedVariables = 0;
+                Data(ref _internalBuffer);
+                return;
+            }
+        }
+
+       // No booleans are present in GLSL
+        public void Update(bool variable)
+        {
+            Update(variable ? 1 : 0);
         }
 
        // Binds the data to the shaders binding point

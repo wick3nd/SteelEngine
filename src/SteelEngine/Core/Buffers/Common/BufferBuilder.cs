@@ -1,12 +1,7 @@
 ﻿namespace SteelEngine.Core.Buffers
 {
-    public struct BufferBuilder
+    public struct BufferBuilder(DataType dataType)
     {
-        internal int size;
-        internal byte[] data;
-        public BufferBuilder(DataType dataType)
-        {
-            size = (int)dataType;
-        }
+        internal int size = (int)dataType;
     }
 }
